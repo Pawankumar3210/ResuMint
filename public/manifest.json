@@ -1,0 +1,35 @@
+{
+  "name": "ResuMint — Create ATS-Friendly Resume in Minutes",
+  "short_name": "ResuMint",
+  "description": "A privacy-first ATS resume builder for students and fresh graduates.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#08080D",
+  "theme_color": "#08080D",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
