@@ -197,6 +197,16 @@
 
 html {
   color-scheme: dark;
+  /* Site-wide compact density -- makes the default (100% browser zoom)
+     render match what the design was actually tuned at, rather than
+     browser-default 16px making every rem-based Tailwind utility (which
+     is most of the site chrome: navbar, buttons, the builder sidebar,
+     dialogs, spacing, type scale) read noticeably larger than intended.
+     This deliberately does NOT affect .resume-paper -- every spacing
+     value in that component is pinned to a fixed px arbitrary value
+     specifically so it stays print-accurate regardless of this root
+     change (see the SITE CHROME SIZING note in resume-paper.tsx). */
+  font-size: 80%;
 }
 
 html.light {

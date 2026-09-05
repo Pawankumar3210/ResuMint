@@ -31,6 +31,22 @@ import { formatDateRange, joinNonEmpty } from "@/utils/helpers";
  * set in the builder sidebar, and the PDF/DOCX exports (which walk the
  * same resume.sectionOrder) never drift from what's shown here.
  *
+ * SITE CHROME SIZING: every spacing utility in this file (gap-*, px-*,
+ * py-*, mt-*, etc.) is written as a fixed px arbitrary value rather than
+ * Tailwind's default rem-based scale, deliberately -- `rem` always
+ * resolves against the root `<html>` font-size, with no way to opt an
+ * element back out locally. The site chrome intentionally sets a
+ * smaller root font-size (see globals.css) so the surrounding UI reads
+ * more compact; without pinning this component to literal px, that same
+ * change would ALSO shrink the resume's internal padding and gaps
+ * (while its font sizes, already hardcoded in px for print accuracy,
+ * stayed the same size) -- text and spacing drifting out of their
+ * designed ratio, silently, the moment anyone touched the root
+ * font-size. Pinning everything here to px makes this component's
+ * rendered proportions depend only on its own literal values, exactly
+ * like a real printed page's dimensions don't depend on the size of
+ * the room it's sitting in.
+ *
  * PAGE BOUNDARY MARKER: this element is one continuously-growing block
  * of HTML (see the height note on the article below) -- there's no real
  * pagination here the way there is in the PDF/DOCX exports. To still
@@ -96,10 +112,10 @@ export function ResumePaper({ resume }: { resume: Resume }) {
         hasContent={education.length > 0}
         placeholder="B.Tech Computer Science, VIT Vellore — Vellore, TN  |  9.1 CGPA  |  Aug 2021 – May 2025"
       >
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-[12px]">
           {education.map((e) => (
-            <div key={e.id} className="flex flex-col gap-0.5">
-              <div className="flex items-baseline justify-between gap-4">
+            <div key={e.id} className="flex flex-col gap-[2px]">
+              <div className="flex items-baseline justify-between gap-[16px]">
                 <p className="min-w-0 flex-1 break-words font-bold text-black">
                   {e.institution || "Institution"}
                   {e.degree && <span className="font-normal text-zinc-800"> — {e.degree}{e.branch ? `, ${e.branch}` : ""}</span>}
@@ -122,10 +138,10 @@ export function ResumePaper({ resume }: { resume: Resume }) {
         hasContent={experience.length > 0}
         placeholder="Add internships, leadership, or work. Use bullet points starting with verbs and include numbers."
       >
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-[16px]">
           {experience.map((e) => (
-            <div key={e.id} className="flex flex-col gap-0.5">
-              <div className="flex items-baseline justify-between gap-4">
+            <div key={e.id} className="flex flex-col gap-[2px]">
+              <div className="flex items-baseline justify-between gap-[16px]">
                 <p className="min-w-0 flex-1 break-words font-bold text-black">
                   {e.role || "Role"} {e.organization && <span className="font-normal text-zinc-800">— {e.organization}</span>}
                 </p>
@@ -148,10 +164,10 @@ export function ResumePaper({ resume }: { resume: Resume }) {
         hasContent={projects.length > 0}
         placeholder="Show 2-3 of your best projects with the stack used and a link. Focus on impact."
       >
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-[12px]">
           {projects.map((p) => (
-            <div key={p.id} className="flex flex-col gap-0.5">
-              <div className="flex items-baseline justify-between gap-4">
+            <div key={p.id} className="flex flex-col gap-[2px]">
+              <div className="flex items-baseline justify-between gap-[16px]">
                 <p className="min-w-0 flex-1 break-words font-bold text-black">{p.name || "Project"}</p>
                 <span className="shrink-0 text-right text-[9.5px] text-zinc-500 break-all">
                   {joinNonEmpty([p.githubUrl, p.liveUrl])}
@@ -171,7 +187,7 @@ export function ResumePaper({ resume }: { resume: Resume }) {
         hasContent={skills.length > 0}
         placeholder="Languages: JavaScript, Python...  |  Frameworks: React, Node...  |  Tools: Git, Docker..."
       >
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-[4px]">
           {SKILL_CATEGORIES.map((category: SkillCategory) => {
             const items = skills.filter((s) => s.category === category);
             if (items.length === 0) return null;
@@ -193,9 +209,9 @@ export function ResumePaper({ resume }: { resume: Resume }) {
         hasContent={certifications.length > 0}
         placeholder="AWS Certified Developer — Amazon (2024)  |  Winner, Smart India Hackathon (2023)"
       >
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-[6px]">
           {certifications.map((c) => (
-            <div key={c.id} className="flex items-baseline justify-between gap-4">
+            <div key={c.id} className="flex items-baseline justify-between gap-[16px]">
               <p className="min-w-0 flex-1 break-words font-bold text-black">
                 {c.name || "Certification"}
                 {c.organization && <span className="font-normal text-zinc-800"> — {c.organization}</span>}
@@ -217,9 +233,9 @@ export function ResumePaper({ resume }: { resume: Resume }) {
           hasContent={achievements.length > 0}
           placeholder="Add awards, honors, or competition wins."
         >
-          <ul className="flex flex-col gap-1">
+          <ul className="flex flex-col gap-[4px]">
             {achievements.map((a) => (
-              <li key={a.id} className="flex gap-2">
+              <li key={a.id} className="flex gap-[8px]">
                 <span aria-hidden="true">•</span>
                 <span>{a.text}</span>
               </li>
@@ -245,7 +261,7 @@ export function ResumePaper({ resume }: { resume: Resume }) {
           <p>{declaration.text}</p>
           {(declaration.showPlace || declaration.showDate || declaration.showSignature) && (
             <div
-              className={`mt-3 flex items-end gap-6 ${
+              className={`mt-[12px] flex items-end gap-[24px] ${
                 (declaration.showPlace || declaration.showDate) && declaration.showSignature
                   ? "justify-between"
                   : declaration.showSignature
@@ -254,19 +270,19 @@ export function ResumePaper({ resume }: { resume: Resume }) {
               }`}
             >
               {(declaration.showPlace || declaration.showDate) && (
-                <div className="flex flex-col gap-0.5 text-[10px] text-zinc-600">
+                <div className="flex flex-col gap-[2px] text-[10px] text-zinc-600">
                   {declaration.showPlace && <p>Place: {declaration.place || "_______________"}</p>}
                   {declaration.showDate && <p>Date: {declaration.date || "_______________"}</p>}
                 </div>
               )}
               {declaration.showSignature && (
-                <div className="flex w-36 flex-col items-center gap-1 text-center">
+                <div className="flex w-[144px] flex-col items-center gap-[4px] text-center">
                   {declaration.showSignatureName && declaration.signatureName?.trim() ? (
                     <p className="w-full truncate font-semibold italic text-black">
                       {declaration.signatureName}
                     </p>
                   ) : (
-                    <div className="h-6 w-full" />
+                    <div className="h-[24px] w-full" />
                   )}
                   <div className="w-full border-t border-black/50" />
                   <p className="text-[9px] uppercase tracking-[0.12em] text-zinc-500">Signature</p>
@@ -288,11 +304,11 @@ export function ResumePaper({ resume }: { resume: Resume }) {
   return (
     <article
       ref={articleRef}
-      className="resume-paper relative flex aspect-[210/297] w-full shrink-0 flex-col gap-6 px-10 py-12 font-resume text-[12px] leading-[1.6] text-zinc-800"
+      className="resume-paper relative flex aspect-[210/297] w-full shrink-0 flex-col gap-[24px] px-[40px] py-[48px] font-resume text-[12px] leading-[1.6] text-zinc-800"
       style={{ fontFamily: "var(--font-resume)" }}
     >
       {/* Header -- centered per spec */}
-      <header className="flex flex-col items-center gap-1.5 pb-2 text-center">
+      <header className="flex flex-col items-center gap-[6px] pb-[8px] text-center">
         <PlaceholderText
           as="h1"
           value={personal.fullName}
@@ -333,7 +349,7 @@ export function ResumePaper({ resume }: { resume: Resume }) {
           style={{ top }}
         >
           <div className="border-t-2 border-dashed border-rose-600" />
-          <span className="absolute right-0 top-0 -translate-y-full whitespace-nowrap rounded-sm bg-rose-600 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-wide text-white">
+          <span className="absolute right-0 top-0 -translate-y-full whitespace-nowrap rounded-sm bg-rose-600 px-[6px] py-[2px] text-[8px] font-semibold uppercase tracking-wide text-white">
             Page {i + 2} starts here
           </span>
         </div>
@@ -344,9 +360,9 @@ export function ResumePaper({ resume }: { resume: Resume }) {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="flex flex-col gap-2 break-inside-avoid print:break-inside-avoid">
+    <section className="flex flex-col gap-[8px] break-inside-avoid print:break-inside-avoid">
       <h2
-        className="border-b-[2px] border-black pb-2 text-[13px] font-bold uppercase tracking-[0.14em] text-black"
+        className="border-b-[2px] border-black pb-[8px] text-[13px] font-bold uppercase tracking-[0.14em] text-black"
         style={{ borderBottomColor: "#000000", borderBottomWidth: "2px", borderBottomStyle: "solid" }}
       >
         {title}
@@ -374,9 +390,9 @@ function PlaceholderSection({
   children: React.ReactNode;
 }) {
   return (
-    <section className="flex flex-col gap-2 break-inside-avoid print:break-inside-avoid">
+    <section className="flex flex-col gap-[8px] break-inside-avoid print:break-inside-avoid">
       <h2
-        className="border-b-[2px] border-black pb-2 text-[13px] font-bold uppercase tracking-[0.14em] text-black"
+        className="border-b-[2px] border-black pb-[8px] text-[13px] font-bold uppercase tracking-[0.14em] text-black"
         style={{ borderBottomColor: "#000000", borderBottomWidth: "2px", borderBottomStyle: "solid" }}
       >
         {title}
