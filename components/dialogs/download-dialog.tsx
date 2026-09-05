@@ -87,7 +87,7 @@ export function DownloadDialog({
 
       <div className="flex flex-col gap-5">
         <Input
-          label="Filename"
+          label="Name your file as you wish!"
           value={filename}
           onChange={(e) => setFilename(e.target.value)}
           hint={`Will be saved as "${filename.trim() || "Resume"}.${format}"`}

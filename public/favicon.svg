@@ -1,0 +1,19 @@
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="leafGradient" x1="4" y1="4" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#14B8A6" />
+      <stop offset="1" stop-color="#06B6D4" />
+    </linearGradient>
+  </defs>
+  <path
+    d="M32 6C18 6 8 16 8 28c0 2.2 0.3 3.6 0.6 4.4C10.8 22.6 19.6 14.4 32 6Z"
+    fill="url(#leafGradient)"
+  />
+  <path
+    d="M32 6C24.8 16 17 24 9.4 31.4"
+    stroke="#052E2B"
+    stroke-width="1.4"
+    stroke-linecap="round"
+    opacity="0.35"
+  />
+</svg>
