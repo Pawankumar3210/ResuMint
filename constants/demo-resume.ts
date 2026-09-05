@@ -104,10 +104,27 @@ export const DEMO_RESUME: Resume = {
   ],
   achievements: [{ id: "demo-ach-1", text: "Winner of SIH India Hackathon 2025" }],
   achievementsEnabled: true,
+  leadership: [
+    {
+      id: "demo-lead-1",
+      organization: "Sapthagiri NPS University Coding Club",
+      role: "Core Member",
+      description: "Organized 2 campus-wide hackathons with 200+ participants each, coordinating sponsors, judges, and logistics end to end.",
+      startMonth: "Aug",
+      startYear: "2024",
+      endMonth: "",
+      endYear: "Present",
+    },
+  ],
   languages: [
     { id: "demo-lang-1", label: "English" },
     { id: "demo-lang-2", label: "Kannada" },
     { id: "demo-lang-3", label: "Hindi" },
+  ],
+  interests: [
+    { id: "demo-int-1", label: "Chess" },
+    { id: "demo-int-2", label: "Photography" },
+    { id: "demo-int-3", label: "Open Source" },
   ],
   declaration: {
     enabled: true,

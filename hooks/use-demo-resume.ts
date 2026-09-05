@@ -19,7 +19,9 @@ const FILL_ORDER: (keyof Resume)[] = [
   "skills",
   "certifications",
   "achievements",
+  "leadership",
   "languages",
+  "interests",
   "declaration",
   "custom",
 ];

@@ -22,7 +22,9 @@ export function buildResumePlainText(resume: Resume): string {
     certifications,
     achievements,
     achievementsEnabled,
+    leadership,
     languages,
+    interests,
     declaration,
     custom,
     sectionOrder,
@@ -113,10 +115,28 @@ export function buildResumePlainText(resume: Resume): string {
       achievements.forEach((a) => lines.push(`- ${a.text}`));
     },
 
+    leadership: () => {
+      if (leadership.length === 0) return;
+      heading("Leadership");
+      leadership.forEach((l, i) => {
+        if (i > 0) blank();
+        const title = `${l.role || "Role"}${l.organization ? ` — ${l.organization}` : ""}`;
+        const date = formatDateRange(l.startMonth, l.startYear, l.endMonth, l.endYear);
+        lines.push(date ? `${title} (${date})` : title);
+        if (l.description) lines.push(l.description);
+      });
+    },
+
     languages: () => {
       if (languages.length === 0) return;
       heading("Languages");
       lines.push(languages.map((l) => l.label).join(", "));
+    },
+
+    interests: () => {
+      if (interests.length === 0) return;
+      heading("Interests");
+      lines.push(interests.map((i) => i.label).join(", "));
     },
 
     declaration: () => {

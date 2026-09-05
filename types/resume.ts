@@ -84,7 +84,23 @@ export interface AchievementEntry {
   text: string;
 }
 
+export interface LeadershipEntry {
+  id: string;
+  organization: string;
+  role: string;
+  description: string;
+  startMonth: string;
+  startYear: string;
+  endMonth: string;
+  endYear: string;
+}
+
 export interface LanguageItem {
+  id: string;
+  label: string;
+}
+
+export interface Interest {
   id: string;
   label: string;
 }
@@ -129,6 +145,8 @@ export interface Resume {
    *  unchanged; this only adds the option to turn it off. */
   achievementsEnabled: boolean;
   languages: LanguageItem[];
+  interests: Interest[];
+  leadership: LeadershipEntry[];
   declaration: Declaration;
   custom: CustomSection;
   /** The order sections other than "personal" render in, across the
@@ -152,7 +170,9 @@ export const SECTION_IDS = [
   "skills",
   "certifications",
   "achievements",
+  "leadership",
   "languages",
+  "interests",
   "declaration",
   "custom",
 ] as const;

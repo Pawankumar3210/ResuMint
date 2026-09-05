@@ -51,7 +51,9 @@ export function ResumePdfDocument({ resume, layout }: { resume: Resume; layout: 
     certifications,
     achievements,
     achievementsEnabled,
+    leadership,
     languages,
+    interests,
     declaration,
     custom,
     sectionOrder,
@@ -170,10 +172,37 @@ export function ResumePdfDocument({ resume, layout }: { resume: Resume; layout: 
         </Section>
       ) : null,
 
+    leadership: () =>
+      leadership.length > 0 ? (
+        <Section key="leadership" title="Leadership" s={s}>
+          {leadership.map((l) => (
+            <View key={l.id} style={s.entry} wrap={false}>
+              <View style={base.entryHeadRow}>
+                <Text style={s.entryTitle}>
+                  {l.role || "Role"}
+                  {l.organization ? ` — ${l.organization}` : ""}
+                </Text>
+                <Text style={s.entryDate}>
+                  {formatDateRange(l.startMonth, l.startYear, l.endMonth, l.endYear)}
+                </Text>
+              </View>
+              {l.description && <Text style={s.body}>{l.description}</Text>}
+            </View>
+          ))}
+        </Section>
+      ) : null,
+
     languages: () =>
       languages.length > 0 ? (
         <Section key="languages" title="Languages" s={s}>
           <Text style={s.body}>{languages.map((l) => l.label).join(", ")}</Text>
+        </Section>
+      ) : null,
+
+    interests: () =>
+      interests.length > 0 ? (
+        <Section key="interests" title="Interests" s={s}>
+          <Text style={s.body}>{interests.map((i) => i.label).join(", ")}</Text>
         </Section>
       ) : null,
 

@@ -30,6 +30,8 @@ export const EMPTY_RESUME: Resume = {
   achievements: [],
   achievementsEnabled: true,
   languages: [],
+  interests: [],
+  leadership: [],
   declaration: {
     enabled: false,
     text: "",
@@ -57,16 +59,19 @@ export const SECTION_META: Record<
   skills: { label: "Skills" },
   certifications: { label: "Certifications", optional: true },
   achievements: { label: "Achievements", optional: true },
+  leadership: { label: "Leadership", optional: true },
   languages: { label: "Languages", optional: true },
+  interests: { label: "Interests", optional: true },
   declaration: { label: "Declaration", optional: true },
   custom: { label: "Custom Section", optional: true },
 };
 
 /** Relative weight each section contributes to overall Resume Completion.
  *  Sums to 100. Core sections (personal, education, experience, etc.)
- *  are weighted higher than optional flourishes (declaration, custom).
- *  Adding "custom" took a point each from languages/declaration to make
- *  room while keeping the total at 100. */
+ *  are weighted higher than optional flourishes (declaration, custom,
+ *  leadership, interests). Adding "leadership"/"interests" took weight
+ *  from a few of the lighter-weighted optional sections to make room
+ *  while keeping the total at 100. */
 export const SECTION_WEIGHTS: Record<SectionId, number> = {
   personal: 15,
   summary: 10,
@@ -74,11 +79,13 @@ export const SECTION_WEIGHTS: Record<SectionId, number> = {
   experience: 15,
   projects: 10,
   skills: 10,
-  certifications: 7,
-  achievements: 7,
-  languages: 4,
-  declaration: 4,
-  custom: 3,
+  certifications: 6,
+  achievements: 6,
+  leadership: 4,
+  languages: 3,
+  interests: 2,
+  declaration: 2,
+  custom: 2,
 };
 
 export const EXPERIENCE_TYPE_OPTIONS = Object.values(ExperienceType);
@@ -179,6 +186,8 @@ export function mergeResumeWithDefaults(loaded: unknown, fallback: Resume): Resu
     achievementsEnabled:
       typeof l.achievementsEnabled === "boolean" ? l.achievementsEnabled : fallback.achievementsEnabled,
     languages: arrayOrFallback("languages"),
+    interests: arrayOrFallback("interests"),
+    leadership: arrayOrFallback("leadership"),
     declaration: { ...fallback.declaration, ...(l.declaration ?? {}) },
     custom: { ...fallback.custom, ...(l.custom ?? {}) },
     sectionOrder: normalizeSectionOrder(l.sectionOrder),

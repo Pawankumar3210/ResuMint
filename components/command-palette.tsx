@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   Search, Download, Trash2, Sparkles, SunMoon, Upload, Undo2, Redo2,
   User, FileText, GraduationCap, Briefcase, FolderGit2, Wrench,
-  BadgeCheck, Trophy, Languages, FileSignature, LayoutList,
+  BadgeCheck, Trophy, Languages, FileSignature, LayoutList, Award, Heart,
 } from "lucide-react";
 import { useCommandPalette } from "@/hooks/use-command-palette";
 import { useAppActions } from "@/hooks/use-app-actions";
@@ -32,7 +32,9 @@ const SECTION_ICONS: Record<SectionId, typeof Download> = {
   skills: Wrench,
   certifications: BadgeCheck,
   achievements: Trophy,
+  leadership: Award,
   languages: Languages,
+  interests: Heart,
   declaration: FileSignature,
   custom: LayoutList,
 };

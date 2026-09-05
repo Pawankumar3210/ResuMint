@@ -9,6 +9,7 @@ import type {
   ProjectEntry,
   CertificationEntry,
   AchievementEntry,
+  LeadershipEntry,
   Declaration,
   CustomSection,
   ReorderableSectionId,
@@ -72,8 +73,17 @@ export interface ResumeContextValue {
   moveAchievement: (id: string, direction: "up" | "down") => void;
   setAchievementsEnabled: (enabled: boolean) => void;
 
+  addLeadership: () => void;
+  updateLeadership: (id: string, patch: Partial<LeadershipEntry>) => void;
+  removeLeadership: (id: string) => void;
+  moveLeadership: (id: string, direction: "up" | "down") => void;
+  duplicateLeadership: (id: string) => void;
+
   addLanguage: (label: string) => void;
   removeLanguage: (id: string) => void;
+
+  addInterest: (label: string) => void;
+  removeInterest: (id: string) => void;
 
   updateDeclaration: (patch: Partial<Declaration>) => void;
 
@@ -485,11 +495,33 @@ export function ResumeProvider({ children }: { children: React.ReactNode }) {
       moveAchievement: (id, direction) => moveEntry("achievements", id, direction),
       setAchievementsEnabled: (enabled) => commit((prev) => ({ ...prev, achievementsEnabled: enabled })),
 
+      addLeadership: () =>
+        addEntry("leadership", {
+          id: createId(),
+          organization: "",
+          role: "",
+          description: "",
+          startMonth: "",
+          startYear: "",
+          endMonth: "",
+          endYear: "",
+        }),
+      updateLeadership: (id, patch) => updateEntry("leadership", id, patch),
+      removeLeadership: (id) => removeEntry("leadership", id),
+      moveLeadership: (id, direction) => moveEntry("leadership", id, direction),
+      duplicateLeadership: (id) => duplicateEntry("leadership", id),
+
       addLanguage: (label) => {
         if (!label.trim()) return;
         addEntry("languages", { id: createId(), label: label.trim() });
       },
       removeLanguage: (id) => removeEntry("languages", id),
+
+      addInterest: (label) => {
+        if (!label.trim()) return;
+        addEntry("interests", { id: createId(), label: label.trim() });
+      },
+      removeInterest: (id) => removeEntry("interests", id),
 
       updateDeclaration: (patch) => patchField("declaration", patch),
 

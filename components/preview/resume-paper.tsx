@@ -79,7 +79,9 @@ export function ResumePaper({ resume }: { resume: Resume }) {
     certifications,
     achievements,
     achievementsEnabled,
+    leadership,
     languages,
+    interests,
     declaration,
     custom,
     sectionOrder,
@@ -244,6 +246,31 @@ export function ResumePaper({ resume }: { resume: Resume }) {
         </PlaceholderSection>
       ) : null,
 
+    leadership: () => (
+      <PlaceholderSection
+        key="leadership"
+        title="Leadership"
+        hasContent={leadership.length > 0}
+        placeholder="Describe leadership roles -- clubs, teams, or organizing committees you led."
+      >
+        <div className="flex flex-col gap-[16px]">
+          {leadership.map((l) => (
+            <div key={l.id} className="flex flex-col gap-[2px]">
+              <div className="flex items-baseline justify-between gap-[16px]">
+                <p className="min-w-0 flex-1 break-words font-bold text-black">
+                  {l.role || "Role"} {l.organization && <span className="font-normal text-zinc-800">— {l.organization}</span>}
+                </p>
+                <span className="shrink-0 text-right text-[9.5px] text-zinc-500">
+                  {formatDateRange(l.startMonth, l.startYear, l.endMonth, l.endYear)}
+                </span>
+              </div>
+              {l.description && <p className="whitespace-pre-line">{l.description}</p>}
+            </div>
+          ))}
+        </div>
+      </PlaceholderSection>
+    ),
+
     languages: () => (
       <PlaceholderSection
         key="languages"
@@ -252,6 +279,17 @@ export function ResumePaper({ resume }: { resume: Resume }) {
         placeholder="e.g. English, Hindi"
       >
         <p>{languages.map((l) => l.label).join(", ")}</p>
+      </PlaceholderSection>
+    ),
+
+    interests: () => (
+      <PlaceholderSection
+        key="interests"
+        title="Interests"
+        hasContent={interests.length > 0}
+        placeholder="e.g. Photography, Chess, Open Source"
+      >
+        <p>{interests.map((i) => i.label).join(", ")}</p>
       </PlaceholderSection>
     ),
 
