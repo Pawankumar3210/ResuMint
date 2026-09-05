@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ResumeBuilder } from "./builder/resume-builder";
 import { ResumePreview } from "./preview/resume-preview";
@@ -48,22 +49,38 @@ export function BuilderPreviewPanels() {
       </div>
 
       <div className="grid h-[102vh] min-h-[816px] grid-cols-1 gap-6 lg:grid-cols-5">
-        <div
+        {/* Each panel gets its own staggered slide-in-from-its-own-side +
+            fade + blur-to-sharp entrance, rather than both just popping
+            in together as part of the parent page fade -- builder from
+            the left, preview from the right, echoing their actual
+            left/right position on screen so the motion reads as "the
+            two halves settling into place" rather than a generic fade.
+            `will-change-transform` avoids a layout repaint hitch on
+            lower-end devices during the (brief) animated phase. */}
+        <motion.div
+          initial={{ opacity: 0, x: -28, filter: "blur(6px)" }}
+          animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+          transition={{ duration: 0.65, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
           className={cn(
-            "h-full min-h-0 lg:col-span-2 lg:block",
+            "h-full min-h-0 will-change-transform lg:col-span-2 lg:block",
             mobileTab === "builder" ? "block" : "hidden"
           )}
         >
           <ResumeBuilder />
-        </div>
-        <GlassCard
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, x: 28, filter: "blur(6px)" }}
+          animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+          transition={{ duration: 0.65, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
           className={cn(
-            "h-full min-h-0 overflow-hidden lg:col-span-3 lg:block",
+            "h-full min-h-0 will-change-transform lg:col-span-3 lg:block",
             mobileTab === "preview" ? "block" : "hidden"
           )}
         >
-          <ResumePreview />
-        </GlassCard>
+          <GlassCard className="h-full min-h-0 overflow-hidden">
+            <ResumePreview />
+          </GlassCard>
+        </motion.div>
       </div>
     </div>
   );

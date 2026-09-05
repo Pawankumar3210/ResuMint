@@ -245,7 +245,18 @@ export function ResumePdfDocument({ resume, layout }: { resume: Resume; layout: 
 
 function Section({ title, s, children }: { title: string; s: typeof styles.normal; children: React.ReactNode }) {
   return (
-    <View style={s.section} wrap={false}>
+    // NOT wrap={false} here. A section containing many entries (e.g.
+    // ten jobs of experience) can legitimately be taller than a single
+    // physical page, and react-pdf has no fallback for an unsplittable
+    // node that doesn't fit: it silently drops/truncates the overflow
+    // instead of raising an error, which for a while made resumes with
+    // enough content quietly lose their tail end with no visible
+    // warning. Each entry inside a section already gets its own
+    // `wrap={false}` (see below), which is the actual guarantee we
+    // want -- no single job/project/entry gets visually cut in half --
+    // while still letting a long section flow across a page boundary
+    // between entries, the same way a real multi-page document would.
+    <View style={s.section} minPresenceAhead={40}>
       <Text style={s.sectionTitle}>{title}</Text>
       {children}
     </View>

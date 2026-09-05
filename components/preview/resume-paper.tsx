@@ -315,7 +315,16 @@ export function ResumePaper({ resume }: { resume: Resume }) {
 
       {/* Page-boundary markers -- screen only, purely informational (see
           module docstring). Absolutely positioned against this article
-          (which has no overflow-hidden), so they're never clipped. */}
+          (which has no overflow-hidden), so they're never clipped.
+          Solid, fully-opaque rose-600 (not a translucent rose-400/70) on
+          both the line and the label chip -- .resume-paper's background
+          is always solid white regardless of the site's light/dark
+          theme (see color-scheme:light above), so a semi-transparent
+          line's effective contrast could vary with whatever renders
+          underneath it; a solid, unambiguous color reads the same
+          every time, in either theme, at a glance. Thicker (2px, not
+          1px) for the same reason -- easier to spot at standard preview
+          zoom levels without hunting for a hairline. */}
       {pageBoundaries.map((top, i) => (
         <div
           key={top}
@@ -323,8 +332,8 @@ export function ResumePaper({ resume }: { resume: Resume }) {
           className="pointer-events-none absolute inset-x-0 z-10 print:hidden"
           style={{ top }}
         >
-          <div className="border-t border-dashed border-rose-400/70" />
-          <span className="absolute right-0 top-0 -translate-y-full whitespace-nowrap rounded-sm bg-rose-50 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-wide text-rose-500">
+          <div className="border-t-2 border-dashed border-rose-600" />
+          <span className="absolute right-0 top-0 -translate-y-full whitespace-nowrap rounded-sm bg-rose-600 px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-wide text-white">
             Page {i + 2} starts here
           </span>
         </div>
