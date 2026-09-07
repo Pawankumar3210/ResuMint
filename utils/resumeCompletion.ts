@@ -83,19 +83,8 @@ export function getSectionStatus(resume: Resume, section: SectionId): SectionSta
       if (!resume.achievementsEnabled) return "empty";
       return resume.achievements.length === 0 ? "empty" : "complete";
 
-    case "leadership": {
-      if (resume.leadership.length === 0) return "empty";
-      const complete = resume.leadership.every(
-        (l) => isNonEmpty(l.organization) && isNonEmpty(l.role) && isNonEmpty(l.description)
-      );
-      return complete ? "complete" : "partial";
-    }
-
     case "languages":
       return resume.languages.length === 0 ? "empty" : "complete";
-
-    case "interests":
-      return resume.interests.length === 0 ? "empty" : "complete";
 
     case "declaration":
       if (!resume.declaration.enabled) return "empty";

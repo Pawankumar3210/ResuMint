@@ -14,8 +14,6 @@ import { SkillsSection } from "@/components/sections/Skills/SkillsSection";
 import { CertificationsSection } from "@/components/sections/Certifications/CertificationsSection";
 import { AchievementsSection } from "@/components/sections/Achievements/AchievementsSection";
 import { LanguagesSection } from "@/components/sections/Languages/LanguagesSection";
-import { InterestsSection } from "@/components/sections/Interests/InterestsSection";
-import { LeadershipSection } from "@/components/sections/Leadership/LeadershipSection";
 import { DeclarationSection } from "@/components/sections/Declaration/DeclarationSection";
 import { CustomSectionForm } from "@/components/sections/Custom/CustomSection";
 
@@ -28,9 +26,7 @@ const SECTION_COMPONENTS = {
   skills: SkillsSection,
   certifications: CertificationsSection,
   achievements: AchievementsSection,
-  leadership: LeadershipSection,
   languages: LanguagesSection,
-  interests: InterestsSection,
   declaration: DeclarationSection,
   custom: CustomSectionForm,
 } as const;

@@ -51,9 +51,7 @@ export function buildResumeDocx(resume: Resume, layout: PageLayout): Document {
     certifications,
     achievements,
     achievementsEnabled,
-    leadership,
     languages,
-    interests,
     declaration,
     custom,
     sectionOrder,
@@ -200,25 +198,9 @@ export function buildResumeDocx(resume: Resume, layout: PageLayout): Document {
       return nodes;
     },
 
-    leadership: () => {
-      if (leadership.length === 0) return [];
-      const nodes: DocxNode[] = [sectionTitle("Leadership")];
-      leadership.forEach((l) => {
-        const title = `${l.role || "Role"}${l.organization ? ` — ${l.organization}` : ""}`;
-        nodes.push(entryHeadPara(title, formatDateRange(l.startMonth, l.startYear, l.endMonth, l.endYear)));
-        if (l.description) nodes.push(bodyPara(l.description, { color: COLOR_BODY }));
-      });
-      return nodes;
-    },
-
     languages: () => {
       if (languages.length === 0) return [];
       return [sectionTitle("Languages"), bodyPara(languages.map((l) => l.label).join(", "), { color: COLOR_BODY })];
-    },
-
-    interests: () => {
-      if (interests.length === 0) return [];
-      return [sectionTitle("Interests"), bodyPara(interests.map((i) => i.label).join(", "), { color: COLOR_BODY })];
     },
 
     declaration: () => {

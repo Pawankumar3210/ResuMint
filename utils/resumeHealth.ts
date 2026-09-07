@@ -54,7 +54,6 @@ export function getResumeHealth(resume: Resume): { score: number; checks: Health
     resume.summary.text,
     ...resume.experience.map((e) => e.description),
     ...resume.projects.map((p) => p.description),
-    ...resume.leadership.map((l) => l.description),
   ]
     .join(" ")
     .trim()
@@ -81,8 +80,8 @@ export function getResumeHealth(resume: Resume): { score: number; checks: Health
     suggestion: summaryLen > 0 && summaryLen < 50 ? "Improve Summary — aim for 2-3 sentences." : undefined,
   });
 
-  // Action verbs across experience + leadership descriptions
-  const actionable = [...resume.experience, ...resume.leadership].filter((e) => e.description.trim());
+  // Action verbs across experience descriptions
+  const actionable = resume.experience.filter((e) => e.description.trim());
   const verbRatio =
     actionable.length === 0
       ? 1
