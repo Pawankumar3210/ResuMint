@@ -6,6 +6,11 @@ import { SITE } from "@/constants/site";
 
 const TYPE_SPEED_MS = 42;
 const START_DELAY_MS = 200;
+/** How long the cursor keeps blinking after typing finishes before it
+ *  fades out for good -- feedback from users found an indefinitely
+ *  blinking cursor distracting once it's just sitting there with
+ *  nothing left to "type". */
+const CURSOR_LINGER_MS = 3000;
 
 /**
  * Left-aligned typewriter headline shown in the main app view (below the
@@ -23,6 +28,8 @@ export function TypingHeadline() {
   const fullText = SITE.tagline.replace(/\.$/, ""); // drop trailing period for a cleaner typed line
   const [visibleChars, setVisibleChars] = useState(prefersReducedMotion ? fullText.length : 0);
   const [started, setStarted] = useState(prefersReducedMotion);
+  const [showCursor, setShowCursor] = useState(true);
+  const typingDone = visibleChars >= fullText.length;
 
   useEffect(() => {
     if (prefersReducedMotion) return;
@@ -37,6 +44,17 @@ export function TypingHeadline() {
     const timer = setTimeout(() => setVisibleChars((n) => n + 1), TYPE_SPEED_MS);
     return () => clearTimeout(timer);
   }, [visibleChars, fullText, started, prefersReducedMotion]);
+
+  // Once the last character has appeared (or immediately, for
+  // prefers-reduced-motion, where typing is skipped entirely), let the
+  // cursor blink a little longer -- like a real line finishing, not an
+  // abrupt cutoff -- then fade it out rather than leave it blinking
+  // forever with nothing left to indicate.
+  useEffect(() => {
+    if (!typingDone) return;
+    const hideTimer = setTimeout(() => setShowCursor(false), CURSOR_LINGER_MS);
+    return () => clearTimeout(hideTimer);
+  }, [typingDone]);
 
   return (
     <motion.div
@@ -62,7 +80,11 @@ export function TypingHeadline() {
         >
           {fullText.slice(0, visibleChars)}
         </span>
-        <span className="typing-cursor" aria-hidden="true" />
+        <span
+          className="typing-cursor"
+          aria-hidden="true"
+          style={{ opacity: showCursor ? 1 : 0, transition: "opacity 0.6s ease-out" }}
+        />
         <span className="sr-only">{fullText}</span>
       </p>
     </motion.div>
