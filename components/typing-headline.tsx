@@ -28,7 +28,7 @@ export function TypingHeadline() {
   const fullText = SITE.tagline.replace(/\.$/, ""); // drop trailing period for a cleaner typed line
   const [visibleChars, setVisibleChars] = useState(prefersReducedMotion ? fullText.length : 0);
   const [started, setStarted] = useState(prefersReducedMotion);
-  const [showCursor, setShowCursor] = useState(true);
+  const [cursorPhase, setCursorPhase] = useState<"blinking" | "stopping" | "hidden">("blinking");
   const typingDone = visibleChars >= fullText.length;
 
   useEffect(() => {
@@ -50,11 +50,31 @@ export function TypingHeadline() {
   // cursor blink a little longer -- like a real line finishing, not an
   // abrupt cutoff -- then fade it out rather than leave it blinking
   // forever with nothing left to indicate.
+  // Once the last character has appeared (or immediately, for
+  // prefers-reduced-motion, where typing is skipped entirely), let the
+  // cursor blink a little longer -- like a real line finishing, not an
+  // abrupt cutoff -- then fade it out rather than leave it blinking
+  // forever with nothing left to indicate.
   useEffect(() => {
     if (!typingDone) return;
-    const hideTimer = setTimeout(() => setShowCursor(false), CURSOR_LINGER_MS);
+    const hideTimer = setTimeout(() => setCursorPhase("stopping"), CURSOR_LINGER_MS);
     return () => clearTimeout(hideTimer);
   }, [typingDone]);
+
+  // "stopping" (animation:none, still opaque) and "hidden" (opacity: 0)
+  // are deliberately two separate renders one animation frame apart,
+  // not one -- setting animation:none and the transitioned opacity
+  // target in the exact same style update is ambiguous across browsers
+  // (no guaranteed "before" state committed for the transition to
+  // interpolate from, so it can just snap straight to invisible instead
+  // of fading). This guarantees the browser has actually painted
+  // "animation stopped, still opaque" before "now fade to 0" is
+  // applied, which is what reliably triggers the transition.
+  useEffect(() => {
+    if (cursorPhase !== "stopping") return;
+    const raf = requestAnimationFrame(() => setCursorPhase("hidden"));
+    return () => cancelAnimationFrame(raf);
+  }, [cursorPhase]);
 
   return (
     <motion.div
@@ -83,7 +103,18 @@ export function TypingHeadline() {
         <span
           className="typing-cursor"
           aria-hidden="true"
-          style={{ opacity: showCursor ? 1 : 0, transition: "opacity 0.6s ease-out" }}
+          style={
+            cursorPhase === "blinking"
+              ? undefined
+              : // animation:none stops the infinite blink (which would
+                // otherwise keep overriding opacity every cycle, since an
+                // active CSS animation wins over inline style values for
+                // whichever property it's animating). opacity only flips
+                // to 0 on the "hidden" phase, one frame after "stopping"
+                // (see the effect above), so the transition has a real,
+                // committed "before" value to animate from.
+                { animation: "none", opacity: cursorPhase === "hidden" ? 0 : 1, transition: "opacity 0.6s ease-out" }
+          }
         />
         <span className="sr-only">{fullText}</span>
       </p>
