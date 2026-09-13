@@ -50,7 +50,7 @@ export function buildResumePlainText(resume: Resume): string {
   const sectionBuilders: Record<ReorderableSectionId, () => void> = {
     summary: () => {
       if (!summary.text.trim()) return;
-      heading("Summary");
+      heading("Professional Summary");
       lines.push(summary.text.trim());
     },
 

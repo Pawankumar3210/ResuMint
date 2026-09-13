@@ -86,7 +86,7 @@ export function ResumePaper({ resume }: { resume: Resume }) {
     summary: () => (
       <PlaceholderSection
         key="summary"
-        title="Summary"
+        title="Professional Summary"
         hasContent={summary.text.trim().length > 0}
         placeholder="Concise 3-4 line professional summary with metrics and intent. E.g. CS undergrad with X, built Y used by Z users, seeking..."
       >

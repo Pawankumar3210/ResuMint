@@ -119,7 +119,7 @@ export function buildResumeDocx(resume: Resume, layout: PageLayout): Document {
   const sectionBuilders: Record<ReorderableSectionId, () => DocxNode[]> = {
     summary: () => {
       if (!summary.text.trim()) return [];
-      return [sectionTitle("Summary"), bodyPara(summary.text, { color: COLOR_BODY })];
+      return [sectionTitle("Professional Summary"), bodyPara(summary.text, { color: COLOR_BODY })];
     },
 
     education: () => {
