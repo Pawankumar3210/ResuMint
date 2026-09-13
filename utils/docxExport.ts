@@ -49,11 +49,14 @@ export function buildResumeDocx(resume: Resume, layout: PageLayout): Document {
     projects,
     skills,
     certifications,
+    certificationsEnabled,
     achievements,
     achievementsEnabled,
     languages,
+    languagesEnabled,
     declaration,
     custom,
+    custom2,
     sectionOrder,
   } = resume;
 
@@ -150,6 +153,17 @@ export function buildResumeDocx(resume: Resume, layout: PageLayout): Document {
       projects.forEach((p) => {
         nodes.push(entryHeadPara(p.name || "Project", joinNonEmpty([p.githubUrl, p.liveUrl])));
         if (p.description) nodes.push(bodyPara(p.description, { color: COLOR_BODY }));
+        if (p.techStack?.trim()) {
+          nodes.push(
+            new Paragraph({
+              spacing: { after: 40 },
+              children: [
+                new TextRun({ text: "Tech Stack: ", bold: true, size: bodySize, color: COLOR_BLACK }),
+                new TextRun({ text: p.techStack, size: bodySize, color: COLOR_BODY }),
+              ],
+            })
+          );
+        }
       });
       return nodes;
     },
@@ -174,7 +188,7 @@ export function buildResumeDocx(resume: Resume, layout: PageLayout): Document {
     },
 
     certifications: () => {
-      if (certifications.length === 0) return [];
+      if (!certificationsEnabled || certifications.length === 0) return [];
       const nodes: DocxNode[] = [sectionTitle("Certifications")];
       certifications.forEach((c) => {
         const title = `${c.name || "Certification"}${c.organization ? ` — ${c.organization}` : ""}`;
@@ -199,7 +213,7 @@ export function buildResumeDocx(resume: Resume, layout: PageLayout): Document {
     },
 
     languages: () => {
-      if (languages.length === 0) return [];
+      if (!languagesEnabled || languages.length === 0) return [];
       return [sectionTitle("Languages"), bodyPara(languages.map((l) => l.label).join(", "), { color: COLOR_BODY })];
     },
 
@@ -327,6 +341,13 @@ export function buildResumeDocx(resume: Resume, layout: PageLayout): Document {
       if (!custom.enabled || !(custom.title.trim() || custom.body.trim())) return [];
       const nodes: DocxNode[] = [sectionTitle(custom.title || "Custom Section")];
       if (custom.body) nodes.push(bodyPara(custom.body, { color: COLOR_BODY }));
+      return nodes;
+    },
+
+    custom2: () => {
+      if (!custom2.enabled || !(custom2.title.trim() || custom2.body.trim())) return [];
+      const nodes: DocxNode[] = [sectionTitle(custom2.title || "Custom Section")];
+      if (custom2.body) nodes.push(bodyPara(custom2.body, { color: COLOR_BODY }));
       return nodes;
     },
   };

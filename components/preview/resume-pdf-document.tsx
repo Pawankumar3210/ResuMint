@@ -49,11 +49,14 @@ export function ResumePdfDocument({ resume, layout }: { resume: Resume; layout: 
     projects,
     skills,
     certifications,
+    certificationsEnabled,
     achievements,
     achievementsEnabled,
     languages,
+    languagesEnabled,
     declaration,
     custom,
+    custom2,
     sectionOrder,
   } = resume;
 
@@ -123,6 +126,12 @@ export function ResumePdfDocument({ resume, layout }: { resume: Resume; layout: 
                 )}
               </View>
               {p.description && <Text style={s.body}>{p.description}</Text>}
+              {p.techStack?.trim() && (
+                <Text style={s.body}>
+                  <Text style={s.entryTitle}>Tech Stack: </Text>
+                  {p.techStack}
+                </Text>
+              )}
             </View>
           ))}
         </Section>
@@ -145,7 +154,7 @@ export function ResumePdfDocument({ resume, layout }: { resume: Resume; layout: 
       ) : null,
 
     certifications: () =>
-      certifications.length > 0 ? (
+      certificationsEnabled && certifications.length > 0 ? (
         <Section key="certifications" title="Certifications" s={s}>
           {certifications.map((c) => (
             <View key={c.id} style={base.entryHeadRow} wrap={false}>
@@ -171,7 +180,7 @@ export function ResumePdfDocument({ resume, layout }: { resume: Resume; layout: 
       ) : null,
 
     languages: () =>
-      languages.length > 0 ? (
+      languagesEnabled && languages.length > 0 ? (
         <Section key="languages" title="Languages" s={s}>
           <Text style={s.body}>{languages.map((l) => l.label).join(", ")}</Text>
         </Section>
@@ -225,6 +234,13 @@ export function ResumePdfDocument({ resume, layout }: { resume: Resume; layout: 
       custom.enabled && (custom.title.trim() || custom.body.trim()) ? (
         <Section key="custom" title={custom.title || "Custom Section"} s={s}>
           <Text style={s.body}>{custom.body}</Text>
+        </Section>
+      ) : null,
+
+    custom2: () =>
+      custom2.enabled && (custom2.title.trim() || custom2.body.trim()) ? (
+        <Section key="custom2" title={custom2.title || "Custom Section"} s={s}>
+          <Text style={s.body}>{custom2.body}</Text>
         </Section>
       ) : null,
   };

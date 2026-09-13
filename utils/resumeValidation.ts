@@ -1,13 +1,28 @@
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-// Loose on purpose: accepts spaces, dashes, parens, +country codes.
-const PHONE_RE = /^[+]?[\d\s()-]{7,}$/;
+// Only digits, spaces, +, -, and parens are allowed characters at all
+// (catches "words"/letters typed by mistake immediately).
+const PHONE_ALLOWED_CHARS_RE = /^[+\d\s()-]*$/;
 
 export function isValidEmail(value: string): boolean {
   return value.trim() === "" || EMAIL_RE.test(value.trim());
 }
 
+/**
+ * Valid once there are between 10 and 15 digits (after stripping
+ * formatting characters) -- 10 covers a plain local number on its own
+ * (e.g. "9876543210"), and 15 is the ITU E.164 maximum total length for
+ * a full international number including a country code (e.g. "+91
+ * 98765 43210" is 12 digits, well within range). Below 10 digits is
+ * flagged as invalid specifically so someone who's typed only 8 or 9 of
+ * their 10-digit number sees the error immediately, rather than only
+ * finding out later that a digit went missing.
+ */
 export function isValidPhone(value: string): boolean {
-  return value.trim() === "" || PHONE_RE.test(value.trim());
+  const trimmed = value.trim();
+  if (trimmed === "") return true;
+  if (!PHONE_ALLOWED_CHARS_RE.test(trimmed)) return false;
+  const digitCount = trimmed.replace(/\D/g, "").length;
+  return digitCount >= 10 && digitCount <= 15;
 }
 
 export function isValidUrl(value: string): boolean {

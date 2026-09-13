@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import type { Resume, ReorderableSectionId, SkillCategory } from "@/types/resume";
 import { SKILL_CATEGORIES } from "@/types/resume";
 import { SKILL_CATEGORY_META } from "@/constants/resume-defaults";
@@ -47,26 +46,16 @@ import { formatDateRange, joinNonEmpty } from "@/utils/helpers";
  * like a real printed page's dimensions don't depend on the size of
  * the room it's sitting in.
  *
- * PAGE BOUNDARY MARKER: this element is one continuously-growing block
- * of HTML (see the height note on the article below) -- there's no real
- * pagination here the way there is in the PDF/DOCX exports. To still
- * give a sense of where page breaks will fall, `usePageBoundaries` below
- * measures the rendered element's actual width and total height and
- * computes where each A4-page-height multiple would land, then renders
- * a dashed marker line at each one. Crucially, this article renders at
- * a FIXED width (RESUME_PAPER_WIDTH_PX, see below) regardless of the
- * panel around it -- the panel instead scales the whole paper down
- * visually via CSS transform (see resume-preview.tsx) when it doesn't
- * fit. That keeps this component's own `clientWidth`/`scrollHeight`
- * measurements -- and therefore the marker's position -- accurate at
- * any panel size, instead of drifting whenever the panel is narrower
- * than the paper's natural width. This is purely a visual aid for
- * editing -- it has no effect on the PDF export (react-pdf paginates
- * for real) or the DOCX export (Word paginates for real); print output
- * additionally gets `break-inside-avoid` on every section below, so a
- * section won't visually split across a physical page when printed via
- * the existing print stylesheet, and the marker itself is hidden for
- * print (`print:hidden`) since it's only meaningful while editing.
+ * PAGE BREAKS: this component is one continuously-growing block of HTML
+ * (see the height note on the article below) -- there's no real
+ * pagination here the way there is in the PDF/DOCX exports, and (per
+ * feedback) an approximated "page N starts here" marker caused more
+ * confusion than it resolved, since it could never perfectly predict
+ * where the PDF/DOCX's real pagination would fall. Removed; each
+ * section still gets `break-inside-avoid` for actual browser printing
+ * (via the existing print stylesheet), so a section won't visually
+ * split across a physical page when printed, even without an on-screen
+ * marker showing where that would happen.
  */
 export function ResumePaper({ resume }: { resume: Resume }) {
   const {
@@ -77,16 +66,16 @@ export function ResumePaper({ resume }: { resume: Resume }) {
     projects,
     skills,
     certifications,
+    certificationsEnabled,
     achievements,
     achievementsEnabled,
     languages,
+    languagesEnabled,
     declaration,
     custom,
+    custom2,
     sectionOrder,
   } = resume;
-
-  const articleRef = useRef<HTMLElement>(null);
-  const pageBoundaries = usePageBoundaries(articleRef, [resume]);
 
   const realContact = joinNonEmpty(
     [personal.email, personal.phone, personal.location, personal.linkedin, personal.github, personal.portfolio],
@@ -174,6 +163,12 @@ export function ResumePaper({ resume }: { resume: Resume }) {
                 </span>
               </div>
               {p.description && <p>{p.description}</p>}
+              {p.techStack?.trim() && (
+                <p className="text-[10.5px] text-zinc-600">
+                  <span className="font-semibold text-zinc-700">Tech Stack: </span>
+                  {p.techStack}
+                </p>
+              )}
             </div>
           ))}
         </div>
@@ -202,28 +197,29 @@ export function ResumePaper({ resume }: { resume: Resume }) {
       </PlaceholderSection>
     ),
 
-    certifications: () => (
-      <PlaceholderSection
-        key="certifications"
-        title="Certifications"
-        hasContent={certifications.length > 0}
-        placeholder="AWS Certified Developer — Amazon (2024)  |  Winner, Smart India Hackathon (2023)"
-      >
-        <div className="flex flex-col gap-[6px]">
-          {certifications.map((c) => (
-            <div key={c.id} className="flex items-baseline justify-between gap-[16px]">
-              <p className="min-w-0 flex-1 break-words font-bold text-black">
-                {c.name || "Certification"}
-                {c.organization && <span className="font-normal text-zinc-800"> — {c.organization}</span>}
-              </p>
-              <span className="shrink-0 text-right text-[9.5px] text-zinc-500">
-                {joinNonEmpty([c.month, c.year])}
-              </span>
-            </div>
-          ))}
-        </div>
-      </PlaceholderSection>
-    ),
+    certifications: () =>
+      certificationsEnabled ? (
+        <PlaceholderSection
+          key="certifications"
+          title="Certifications"
+          hasContent={certifications.length > 0}
+          placeholder="AWS Certified Developer — Amazon (2024)  |  Winner, Smart India Hackathon (2023)"
+        >
+          <div className="flex flex-col gap-[6px]">
+            {certifications.map((c) => (
+              <div key={c.id} className="flex items-baseline justify-between gap-[16px]">
+                <p className="min-w-0 flex-1 break-words font-bold text-black">
+                  {c.name || "Certification"}
+                  {c.organization && <span className="font-normal text-zinc-800"> — {c.organization}</span>}
+                </p>
+                <span className="shrink-0 text-right text-[9.5px] text-zinc-500">
+                  {joinNonEmpty([c.month, c.year])}
+                </span>
+              </div>
+            ))}
+          </div>
+        </PlaceholderSection>
+      ) : null,
 
     achievements: () =>
       achievementsEnabled ? (
@@ -244,16 +240,17 @@ export function ResumePaper({ resume }: { resume: Resume }) {
         </PlaceholderSection>
       ) : null,
 
-    languages: () => (
-      <PlaceholderSection
-        key="languages"
-        title="Languages"
-        hasContent={languages.length > 0}
-        placeholder="e.g. English, Hindi"
-      >
-        <p>{languages.map((l) => l.label).join(", ")}</p>
-      </PlaceholderSection>
-    ),
+    languages: () =>
+      languagesEnabled ? (
+        <PlaceholderSection
+          key="languages"
+          title="Languages"
+          hasContent={languages.length > 0}
+          placeholder="e.g. English, Hindi"
+        >
+          <p>{languages.map((l) => l.label).join(", ")}</p>
+        </PlaceholderSection>
+      ) : null,
 
     declaration: () =>
       declaration.enabled && declaration.text.trim() ? (
@@ -299,11 +296,17 @@ export function ResumePaper({ resume }: { resume: Resume }) {
           <p className="whitespace-pre-line">{custom.body}</p>
         </Section>
       ) : null,
+
+    custom2: () =>
+      custom2.enabled && (custom2.title.trim() || custom2.body.trim()) ? (
+        <Section key="custom2" title={custom2.title || "Custom Section"}>
+          <p className="whitespace-pre-line">{custom2.body}</p>
+        </Section>
+      ) : null,
   };
 
   return (
     <article
-      ref={articleRef}
       className="resume-paper relative flex aspect-[210/297] w-full shrink-0 flex-col gap-[24px] px-[40px] py-[48px] font-resume text-[12px] leading-[1.6] text-zinc-800"
       style={{ fontFamily: "var(--font-resume)" }}
     >
@@ -328,32 +331,6 @@ export function ResumePaper({ resume }: { resume: Resume }) {
       </header>
 
       {sectionOrder.map((id) => sectionRenderers[id]())}
-
-      {/* Page-boundary markers -- screen only, purely informational (see
-          module docstring). Absolutely positioned against this article
-          (which has no overflow-hidden), so they're never clipped.
-          Solid, fully-opaque rose-600 (not a translucent rose-400/70) on
-          both the line and the label chip -- .resume-paper's background
-          is always solid white regardless of the site's light/dark
-          theme (see color-scheme:light above), so a semi-transparent
-          line's effective contrast could vary with whatever renders
-          underneath it; a solid, unambiguous color reads the same
-          every time, in either theme, at a glance. Thicker (2px, not
-          1px) for the same reason -- easier to spot at standard preview
-          zoom levels without hunting for a hairline. */}
-      {pageBoundaries.map((top, i) => (
-        <div
-          key={top}
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 z-10 print:hidden"
-          style={{ top }}
-        >
-          <div className="border-t-2 border-dashed border-rose-600" />
-          <span className="absolute right-0 top-0 -translate-y-full whitespace-nowrap rounded-sm bg-rose-600 px-[6px] py-[2px] text-[8px] font-semibold uppercase tracking-wide text-white">
-            Page {i + 2} starts here
-          </span>
-        </div>
-      ))}
     </article>
   );
 }
@@ -434,73 +411,13 @@ function PlaceholderText({
 }
 
 /** Fixed design width, in CSS px, that the resume paper's internal
- *  layout (text wrapping, section spacing, and the page-boundary
- *  measurement below) is always computed at -- regardless of how wide
- *  the actual on-screen panel happens to be. See resume-preview.tsx's
- *  shrink-to-fit wrapper, which visually scales this fixed-width paper
- *  down (via CSS transform) to fit narrower panels WITHOUT changing its
- *  internal layout. This is what keeps the page-boundary marker below
- *  accurate: `transform: scale()` never affects `clientWidth` or
- *  `scrollHeight` (transforms are paint-only), so as long as the article
- *  itself has a fixed width rather than a responsive one, this
- *  component's own measurements stay stable and correct no matter how
- *  the panel around it resizes. Previously this was a responsive
- *  `w-full max-w-[820px]`, which let a narrower panel force extra text
- *  wrapping (taller content) while ALSO shrinking the computed
- *  page-height threshold -- a compounding bug that made the marker fire
- *  far too early on anything less than a full-width panel. */
+ *  layout (text wrapping and section spacing) is always computed at --
+ *  regardless of how wide the actual on-screen panel happens to be. See
+ *  resume-preview.tsx's shrink-to-fit wrapper, which visually scales
+ *  this fixed-width paper down (via CSS transform) to fit narrower
+ *  panels WITHOUT changing its internal layout. `transform: scale()`
+ *  never affects `clientWidth` or `scrollHeight` (transforms are
+ *  paint-only), so as long as the article itself has a fixed width
+ *  rather than a responsive one, this component's own layout stays
+ *  stable no matter how the panel around it resizes. */
 export const RESUME_PAPER_WIDTH_PX = 820;
-
-/** A4's height:width ratio (297mm / 210mm) -- matches the `aspect-[210/297]`
- *  class on the article above, which only governs the box's height when
- *  content is short enough to fit; once content overflows that single-page
- *  aspect ratio, the flex column just keeps growing taller (this element
- *  intentionally has no fixed height/overflow -- see module docstring),
- *  which is what makes it "one continuous scroll" in the first place. */
-const A4_ASPECT_RATIO = 297 / 210;
-
-/**
- * Measures the resume-paper element's actual rendered width and total
- * (scroll) height, then returns the list of `top` pixel offsets at which
- * each A4 page boundary would fall -- i.e. one entry per page break after
- * the first page. Recomputes on resize (responsive width) and whenever
- * `deps` changes (new content can grow the element's height without its
- * width changing, which a ResizeObserver on this same element also
- * reports, but `deps` covers the very first paint after a fast content
- * change more reliably than waiting on the observer callback).
- */
-function usePageBoundaries(ref: React.RefObject<HTMLElement | null>, deps: unknown[]): number[] {
-  const [boundaries, setBoundaries] = useState<number[]>([]);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const compute = () => {
-      const width = el.clientWidth;
-      const totalHeight = el.scrollHeight;
-      if (!width || !totalHeight) {
-        setBoundaries([]);
-        return;
-      }
-      const pageHeight = width * A4_ASPECT_RATIO;
-      // Only interior boundaries -- if content fits on one page there are
-      // none; a small epsilon avoids a spurious marker landing exactly on
-      // (or a fraction of a pixel before) the element's own bottom edge.
-      const pageCount = Math.floor(totalHeight / pageHeight - 0.01) + 1;
-      const next: number[] = [];
-      for (let page = 1; page < pageCount; page++) {
-        next.push(Math.round(pageHeight * page));
-      }
-      setBoundaries(next);
-    };
-
-    compute();
-    const observer = new ResizeObserver(compute);
-    observer.observe(el);
-    return () => observer.disconnect();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ref, ...deps]);
-
-  return boundaries;
-}

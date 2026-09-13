@@ -15,7 +15,7 @@ import { CertificationsSection } from "@/components/sections/Certifications/Cert
 import { AchievementsSection } from "@/components/sections/Achievements/AchievementsSection";
 import { LanguagesSection } from "@/components/sections/Languages/LanguagesSection";
 import { DeclarationSection } from "@/components/sections/Declaration/DeclarationSection";
-import { CustomSectionForm } from "@/components/sections/Custom/CustomSection";
+import { CustomSectionForm, CustomSectionForm2 } from "@/components/sections/Custom/CustomSection";
 
 const SECTION_COMPONENTS = {
   personal: PersonalDetailsSection,
@@ -29,6 +29,7 @@ const SECTION_COMPONENTS = {
   languages: LanguagesSection,
   declaration: DeclarationSection,
   custom: CustomSectionForm,
+  custom2: CustomSectionForm2,
 } as const;
 
 export function BuilderSidebar({

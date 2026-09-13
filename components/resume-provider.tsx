@@ -65,6 +65,7 @@ export interface ResumeContextValue {
   removeCertification: (id: string) => void;
   moveCertification: (id: string, direction: "up" | "down") => void;
   duplicateCertification: (id: string) => void;
+  setCertificationsEnabled: (enabled: boolean) => void;
 
   addAchievement: (text: string) => void;
   updateAchievement: (id: string, patch: Partial<AchievementEntry>) => void;
@@ -74,10 +75,12 @@ export interface ResumeContextValue {
 
   addLanguage: (label: string) => void;
   removeLanguage: (id: string) => void;
+  setLanguagesEnabled: (enabled: boolean) => void;
 
   updateDeclaration: (patch: Partial<Declaration>) => void;
 
   updateCustomSection: (patch: Partial<CustomSection>) => void;
+  updateCustomSection2: (patch: Partial<CustomSection>) => void;
 
   /** Swaps a section with its immediate neighbor in resume.sectionOrder
    *  -- a no-op if it's already at that end, same convention as
@@ -209,7 +212,7 @@ export function ResumeProvider({ children }: { children: React.ReactNode }) {
 
   // Generic patcher for the top-level "one object" sections (personal, summary, declaration, custom).
   const patchField = useCallback(
-    <K extends "personal" | "summary" | "declaration" | "custom">(key: K, patch: Partial<Resume[K]>) => {
+    <K extends "personal" | "summary" | "declaration" | "custom" | "custom2">(key: K, patch: Partial<Resume[K]>) => {
       commit((prev) => ({ ...prev, [key]: { ...prev[key], ...patch } }));
     },
     [commit]
@@ -449,6 +452,7 @@ export function ResumeProvider({ children }: { children: React.ReactNode }) {
           id: createId(),
           name: "",
           description: "",
+          techStack: "",
           githubUrl: "",
           liveUrl: "",
         }),
@@ -475,6 +479,7 @@ export function ResumeProvider({ children }: { children: React.ReactNode }) {
       removeCertification: (id) => removeEntry("certifications", id),
       moveCertification: (id, direction) => moveEntry("certifications", id, direction),
       duplicateCertification: (id) => duplicateEntry("certifications", id),
+      setCertificationsEnabled: (enabled) => commit((prev) => ({ ...prev, certificationsEnabled: enabled })),
 
       addAchievement: (text) => {
         if (!text.trim()) return;
@@ -490,10 +495,12 @@ export function ResumeProvider({ children }: { children: React.ReactNode }) {
         addEntry("languages", { id: createId(), label: label.trim() });
       },
       removeLanguage: (id) => removeEntry("languages", id),
+      setLanguagesEnabled: (enabled) => commit((prev) => ({ ...prev, languagesEnabled: enabled })),
 
       updateDeclaration: (patch) => patchField("declaration", patch),
 
       updateCustomSection: (patch) => patchField("custom", patch),
+      updateCustomSection2: (patch) => patchField("custom2", patch),
       moveSection,
 
       setResume: (next) => commit(() => next, { discrete: true }),

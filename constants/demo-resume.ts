@@ -68,6 +68,7 @@ export const DEMO_RESUME: Resume = {
       name: "CampusEats",
       description:
         "A food ordering platform for college campuses handling 200+ daily orders, with real-time order tracking and a Node.js/Express backend.",
+      techStack: "React, Node.js, Express, MongoDB",
       githubUrl: "github.com/aaravmehta/campuseats",
       liveUrl: "",
     },
@@ -76,6 +77,7 @@ export const DEMO_RESUME: Resume = {
       name: "Travel Planner",
       description:
         "A platform which helps you decide destinations to travel, plan budget, and also gives information about local culture and favourite spots.",
+      techStack: "React, TypeScript, Tailwind CSS",
       githubUrl: "github.com/aaravmehta/travelplanner",
       liveUrl: "",
     },
@@ -102,6 +104,7 @@ export const DEMO_RESUME: Resume = {
       year: "2026",
     },
   ],
+  certificationsEnabled: true,
   achievements: [{ id: "demo-ach-1", text: "Winner of SIH India Hackathon 2025" }],
   achievementsEnabled: true,
   languages: [
@@ -109,6 +112,7 @@ export const DEMO_RESUME: Resume = {
     { id: "demo-lang-2", label: "Kannada" },
     { id: "demo-lang-3", label: "Hindi" },
   ],
+  languagesEnabled: true,
   declaration: {
     enabled: true,
     text: "I hereby declare that the information provided above is true to the best of my knowledge.",
@@ -125,5 +129,6 @@ export const DEMO_RESUME: Resume = {
     title: "Extracurricular Activities",
     body: "Core member, college coding club -- organized 2 campus-wide hackathons with 200+ participants.",
   },
+  custom2: { enabled: false, title: "", body: "" },
   sectionOrder: DEFAULT_SECTION_ORDER,
 };

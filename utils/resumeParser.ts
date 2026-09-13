@@ -671,6 +671,7 @@ export function parseResumeText(rawText: string): ParsedResumeResult {
         id: createId(),
         name: namePart,
         description: chunk.slice(1).join(" "),
+        techStack: "",
         githubUrl,
         liveUrl,
       };

@@ -27,9 +27,11 @@ export const EMPTY_RESUME: Resume = {
   projects: [],
   skills: [],
   certifications: [],
+  certificationsEnabled: true,
   achievements: [],
   achievementsEnabled: true,
   languages: [],
+  languagesEnabled: true,
   declaration: {
     enabled: false,
     text: "",
@@ -42,6 +44,7 @@ export const EMPTY_RESUME: Resume = {
     signatureName: "",
   },
   custom: { enabled: false, title: "", body: "" },
+  custom2: { enabled: false, title: "", body: "" },
   sectionOrder: DEFAULT_SECTION_ORDER,
 };
 
@@ -60,13 +63,14 @@ export const SECTION_META: Record<
   languages: { label: "Languages", optional: true },
   declaration: { label: "Declaration", optional: true },
   custom: { label: "Custom Section", optional: true },
+  custom2: { label: "Custom Section 2", optional: true },
 };
 
 /** Relative weight each section contributes to overall Resume Completion.
  *  Sums to 100. Core sections (personal, education, experience, etc.)
  *  are weighted higher than optional flourishes (declaration, custom).
- *  Adding "custom" took a point each from languages/declaration to make
- *  room while keeping the total at 100. */
+ *  Adding "custom2" took a point from custom to make room while keeping
+ *  the total at 100. */
 export const SECTION_WEIGHTS: Record<SectionId, number> = {
   personal: 15,
   summary: 10,
@@ -78,7 +82,8 @@ export const SECTION_WEIGHTS: Record<SectionId, number> = {
   achievements: 7,
   languages: 4,
   declaration: 4,
-  custom: 3,
+  custom: 2,
+  custom2: 1,
 };
 
 export const EXPERIENCE_TYPE_OPTIONS = Object.values(ExperienceType);
@@ -120,7 +125,7 @@ export const YEAR_OPTIONS = Array.from({ length: 60 }, (_, i) =>
 
 export const MAX_SUMMARY_LENGTH = 600;
 export const MAX_PROJECTS = 5;
-export const MAX_PROJECT_DESCRIPTION_LENGTH = 180;
+export const MAX_PROJECT_DESCRIPTION_LENGTH = 500;
 
 /**
  * Backfills a resume loaded from localStorage with any fields missing
@@ -175,12 +180,16 @@ export function mergeResumeWithDefaults(loaded: unknown, fallback: Resume): Resu
     projects: arrayOrFallback("projects"),
     skills: arrayOrFallback("skills"),
     certifications: arrayOrFallback("certifications"),
+    certificationsEnabled:
+      typeof l.certificationsEnabled === "boolean" ? l.certificationsEnabled : fallback.certificationsEnabled,
     achievements: arrayOrFallback("achievements"),
     achievementsEnabled:
       typeof l.achievementsEnabled === "boolean" ? l.achievementsEnabled : fallback.achievementsEnabled,
     languages: arrayOrFallback("languages"),
+    languagesEnabled: typeof l.languagesEnabled === "boolean" ? l.languagesEnabled : fallback.languagesEnabled,
     declaration: { ...fallback.declaration, ...(l.declaration ?? {}) },
     custom: { ...fallback.custom, ...(l.custom ?? {}) },
+    custom2: { ...fallback.custom2, ...(l.custom2 ?? {}) },
     sectionOrder: normalizeSectionOrder(l.sectionOrder),
   };
 }

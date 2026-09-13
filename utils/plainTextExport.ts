@@ -20,11 +20,14 @@ export function buildResumePlainText(resume: Resume): string {
     projects,
     skills,
     certifications,
+    certificationsEnabled,
     achievements,
     achievementsEnabled,
     languages,
+    languagesEnabled,
     declaration,
     custom,
+    custom2,
     sectionOrder,
   } = resume;
 
@@ -84,6 +87,7 @@ export function buildResumePlainText(resume: Resume): string {
         const links = joinNonEmpty([p.githubUrl, p.liveUrl]);
         lines.push(links ? `${p.name || "Project"} (${links})` : p.name || "Project");
         if (p.description) lines.push(p.description);
+        if (p.techStack?.trim()) lines.push(`Tech Stack: ${p.techStack.trim()}`);
       });
     },
 
@@ -98,7 +102,7 @@ export function buildResumePlainText(resume: Resume): string {
     },
 
     certifications: () => {
-      if (certifications.length === 0) return;
+      if (!certificationsEnabled || certifications.length === 0) return;
       heading("Certifications");
       certifications.forEach((c) => {
         const title = `${c.name || "Certification"}${c.organization ? ` — ${c.organization}` : ""}`;
@@ -114,7 +118,7 @@ export function buildResumePlainText(resume: Resume): string {
     },
 
     languages: () => {
-      if (languages.length === 0) return;
+      if (!languagesEnabled || languages.length === 0) return;
       heading("Languages");
       lines.push(languages.map((l) => l.label).join(", "));
     },
@@ -142,6 +146,12 @@ export function buildResumePlainText(resume: Resume): string {
       if (!custom.enabled || !(custom.title.trim() || custom.body.trim())) return;
       heading(custom.title || "Custom Section");
       if (custom.body.trim()) lines.push(custom.body.trim());
+    },
+
+    custom2: () => {
+      if (!custom2.enabled || !(custom2.title.trim() || custom2.body.trim())) return;
+      heading(custom2.title || "Custom Section");
+      if (custom2.body.trim()) lines.push(custom2.body.trim());
     },
   };
 

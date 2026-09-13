@@ -72,6 +72,7 @@ export function getSectionStatus(resume: Resume, section: SectionId): SectionSta
     }
 
     case "certifications": {
+      if (!resume.certificationsEnabled) return "empty";
       if (resume.certifications.length === 0) return "empty";
       const complete = resume.certifications.every(
         (c) => isNonEmpty(c.name) && isNonEmpty(c.organization)
@@ -84,6 +85,7 @@ export function getSectionStatus(resume: Resume, section: SectionId): SectionSta
       return resume.achievements.length === 0 ? "empty" : "complete";
 
     case "languages":
+      if (!resume.languagesEnabled) return "empty";
       return resume.languages.length === 0 ? "empty" : "complete";
 
     case "declaration":
@@ -93,6 +95,10 @@ export function getSectionStatus(resume: Resume, section: SectionId): SectionSta
     case "custom":
       if (!resume.custom.enabled) return "empty";
       return isNonEmpty(resume.custom.title) && isNonEmpty(resume.custom.body) ? "complete" : "partial";
+
+    case "custom2":
+      if (!resume.custom2.enabled) return "empty";
+      return isNonEmpty(resume.custom2.title) && isNonEmpty(resume.custom2.body) ? "complete" : "partial";
 
     default:
       return "empty";

@@ -43,8 +43,34 @@ export function ProjectsSection() {
                 })
               }
               maxLength={MAX_PROJECT_DESCRIPTION_LENGTH}
+              rows={6}
               placeholder="Real-time feed and DMs, 1.2k MAU in first month. Optimized feed query from O(n^2) to O(n log n)."
             />
+            {/* Label-left, field-right -- deliberately not the standard
+                label-above-field layout the rest of the form uses, since
+                this is a single short line (comma-separated tech names)
+                rather than a paragraph, and reads more naturally as one
+                continuous row: "Tech Stack: React, Node.js, MongoDB". */}
+            <div className="flex items-center gap-3">
+              <label
+                htmlFor={`tech-stack-${entry.id}`}
+                className="shrink-0 font-mono text-sm font-medium text-foreground"
+              >
+                Tech Stack
+                <span className="ml-1.5 font-normal text-foreground-secondary">(optional)</span>
+              </label>
+              <input
+                id={`tech-stack-${entry.id}`}
+                type="text"
+                value={entry.techStack}
+                onChange={(e) => updateProject(entry.id, { techStack: e.target.value })}
+                placeholder="React, Node.js, MongoDB"
+                className="h-11 min-w-0 flex-1 rounded-input border border-glass-border bg-transparent px-3.5 text-sm text-foreground
+                           glass-surface placeholder:text-foreground-secondary/60
+                           transition-all duration-200 ease-out
+                           focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/25"
+              />
+            </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Input
                 label="GitHub URL"

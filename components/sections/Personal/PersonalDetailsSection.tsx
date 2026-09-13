@@ -41,7 +41,7 @@ export function PersonalDetailsSection() {
         onChange={(e) => updatePersonal({ phone: e.target.value })}
         onBlur={() => updatePersonal({ phone: cleanWhitespace(p.phone) })}
         placeholder="+91 98765 43210"
-        error={p.phone && !isValidPhone(p.phone) ? "Enter a valid phone number." : undefined}
+        error={p.phone && !isValidPhone(p.phone) ? "Enter a valid phone number (at least 10 digits)." : undefined}
         autoComplete="tel"
       />
       <Input

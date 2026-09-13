@@ -58,6 +58,7 @@ export interface ProjectEntry {
   id: string;
   name: string;
   description: string;
+  techStack: string; // optional -- free text, e.g. "React, Node.js, PostgreSQL"
   githubUrl: string; // optional
   liveUrl: string; // optional
 }
@@ -101,13 +102,13 @@ export interface Declaration {
   signatureName: string;
 }
 
-/** A single user-defined, free-text section (title + body), toggleable
- *  on/off the same way Declaration/Achievements are. Only one is
- *  supported -- keeps the data model, sectionOrder, and all three
- *  renderers simple, and covers the common case ("I want one more
- *  section the builder doesn't have a dedicated form for") without
- *  introducing dynamically-keyed sections into a codebase where every
- *  other section is a fixed, statically-typed SectionId. */
+/** A user-defined, free-text section (title + body), toggleable on/off
+ *  the same way Declaration/Achievements are. Two independent slots are
+ *  supported (see Resume.custom / Resume.custom2 below) rather than a
+ *  dynamic list -- covers "I want one or two more sections the builder
+ *  doesn't have a dedicated form for" without introducing
+ *  dynamically-keyed sections into a codebase where every other section
+ *  is a fixed, statically-typed SectionId. */
 export interface CustomSection {
   enabled: boolean;
   title: string;
@@ -122,6 +123,12 @@ export interface Resume {
   projects: ProjectEntry[];
   skills: SkillItem[];
   certifications: CertificationEntry[];
+  /** Lets the whole Certifications section be hidden even if entries
+   *  exist, the same way Declaration.enabled/achievementsEnabled work --
+   *  defaults to true so existing resumes with certifications already
+   *  saved keep showing them unchanged; this only adds the option to
+   *  turn it off. */
+  certificationsEnabled: boolean;
   achievements: AchievementEntry[];
   /** Lets the whole Achievements section be hidden even if entries exist,
    *  the same way Declaration.enabled works -- defaults to true so
@@ -129,8 +136,11 @@ export interface Resume {
    *  unchanged; this only adds the option to turn it off. */
   achievementsEnabled: boolean;
   languages: LanguageItem[];
+  /** Same pattern as certificationsEnabled/achievementsEnabled. */
+  languagesEnabled: boolean;
   declaration: Declaration;
   custom: CustomSection;
+  custom2: CustomSection;
   /** The order sections other than "personal" render in, across the
    *  builder sidebar, live preview, PDF export, and DOCX export --
    *  reorderable by the person via up/down controls. "personal" is
@@ -155,6 +165,7 @@ export const SECTION_IDS = [
   "languages",
   "declaration",
   "custom",
+  "custom2",
 ] as const;
 
 export type SectionId = (typeof SECTION_IDS)[number];
