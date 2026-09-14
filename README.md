@@ -1,6 +1,6 @@
 # 🍃 ResuMint
 
-Create ATS-friendly resumes in minutes. Privacy-first, no login, no ads, forever free.
+Create ATS-friendly resumes in minutes. Privacy-first, no login, no ads, forever free!
 
 ## Getting Started
 
