@@ -611,6 +611,43 @@ body,
 }
 
 /* ---------------------------------------------------------------------- */
+/* Smooth Entrance Animations (Builder & Full Resume Preview)             */
+/* ---------------------------------------------------------------------- */
+@keyframes slideInPanelLeft {
+  0% {
+    opacity: 0;
+    transform: translate3d(-70px, 0, 0) scale(0.98);
+    filter: blur(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0px);
+  }
+}
+
+@keyframes slideInPanelRight {
+  0% {
+    opacity: 0;
+    transform: translate3d(70px, 0, 0) scale(0.98);
+    filter: blur(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0px);
+  }
+}
+
+.animate-slide-in-left {
+  animation: slideInPanelLeft 0.95s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-slide-in-right {
+  animation: slideInPanelRight 1.05s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+}
+
+/* ---------------------------------------------------------------------- */
 /* Print stylesheet                                                       */
 /* Printing (Ctrl/Cmd+P) from the live preview shows *only* the resume    */
 /* paper -- none of the surrounding app chrome (navbar, builder panel,    */

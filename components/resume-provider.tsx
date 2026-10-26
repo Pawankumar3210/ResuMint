@@ -38,12 +38,14 @@ export interface ResumeContextValue {
 
   updatePersonal: (patch: Partial<PersonalDetails>) => void;
   updateSummary: (text: string) => void;
+  setSummaryEnabled: (enabled: boolean) => void;
 
   addEducation: () => void;
   updateEducation: (id: string, patch: Partial<EducationEntry>) => void;
   removeEducation: (id: string) => void;
   moveEducation: (id: string, direction: "up" | "down") => void;
   duplicateEducation: (id: string) => void;
+  setEducationEnabled: (enabled: boolean) => void;
 
   addExperience: () => void;
   updateExperience: (id: string, patch: Partial<ExperienceEntry>) => void;
@@ -411,6 +413,7 @@ export function ResumeProvider({ children }: { children: React.ReactNode }) {
 
       updatePersonal: (patch) => patchField("personal", patch),
       updateSummary: (text) => patchField("summary", { text }),
+      setSummaryEnabled: (enabled) => commit((prev) => ({ ...prev, summaryEnabled: enabled })),
 
       addEducation: () =>
         addEntry("education", {
@@ -428,6 +431,7 @@ export function ResumeProvider({ children }: { children: React.ReactNode }) {
       removeEducation: (id) => removeEntry("education", id),
       moveEducation: (id, direction) => moveEntry("education", id, direction),
       duplicateEducation: (id) => duplicateEntry("education", id),
+      setEducationEnabled: (enabled) => commit((prev) => ({ ...prev, educationEnabled: enabled })),
 
       addExperience: () =>
         addEntry("experience", {

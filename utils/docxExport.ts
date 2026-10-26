@@ -44,7 +44,9 @@ export function buildResumeDocx(resume: Resume, layout: PageLayout): Document {
   const {
     personal,
     summary,
+    summaryEnabled = true,
     education,
+    educationEnabled = true,
     experience,
     projects,
     skills,
@@ -118,12 +120,12 @@ export function buildResumeDocx(resume: Resume, layout: PageLayout): Document {
 
   const sectionBuilders: Record<ReorderableSectionId, () => DocxNode[]> = {
     summary: () => {
-      if (!summary.text.trim()) return [];
+      if (!summaryEnabled || !summary.text.trim()) return [];
       return [sectionTitle("Professional Summary"), bodyPara(summary.text, { color: COLOR_BODY })];
     },
 
     education: () => {
-      if (education.length === 0) return [];
+      if (!educationEnabled || education.length === 0) return [];
       const nodes: DocxNode[] = [sectionTitle("Education")];
       education.forEach((e) => {
         const title = `${e.institution || "Institution"}${e.degree ? ` — ${e.degree}${e.branch ? `, ${e.branch}` : ""}` : ""}`;

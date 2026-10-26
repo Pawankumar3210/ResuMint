@@ -61,7 +61,9 @@ export function ResumePaper({ resume }: { resume: Resume }) {
   const {
     personal,
     summary,
+    summaryEnabled,
     education,
+    educationEnabled,
     experience,
     projects,
     skills,
@@ -83,42 +85,44 @@ export function ResumePaper({ resume }: { resume: Resume }) {
   );
 
   const sectionRenderers: Record<ReorderableSectionId, () => React.ReactNode> = {
-    summary: () => (
-      <PlaceholderSection
-        key="summary"
-        title="Professional Summary"
-        hasContent={summary.text.trim().length > 0}
-        placeholder="Concise 3-4 line professional summary with metrics and intent. E.g. CS undergrad with X, built Y used by Z users, seeking..."
-      >
-        <p>{summary.text}</p>
-      </PlaceholderSection>
-    ),
+    summary: () =>
+      summaryEnabled ? (
+        <PlaceholderSection
+          key="summary"
+          title="Professional Summary"
+          hasContent={summary.text.trim().length > 0}
+          placeholder="Concise 3-4 line professional summary with metrics and intent. E.g. CS undergrad with X, built Y used by Z users, seeking..."
+        >
+          <p>{summary.text}</p>
+        </PlaceholderSection>
+      ) : null,
 
-    education: () => (
-      <PlaceholderSection
-        key="education"
-        title="Education"
-        hasContent={education.length > 0}
-        placeholder="B.Tech Computer Science, VIT Vellore — Vellore, TN  |  9.1 CGPA  |  Aug 2021 – May 2025"
-      >
-        <div className="flex flex-col gap-[12px]">
-          {education.map((e) => (
-            <div key={e.id} className="flex flex-col gap-[2px]">
-              <div className="flex items-baseline justify-between gap-[16px]">
-                <p className="min-w-0 flex-1 break-words font-bold text-black">
-                  {e.institution || "Institution"}
-                  {e.degree && <span className="font-normal text-zinc-800"> — {e.degree}{e.branch ? `, ${e.branch}` : ""}</span>}
-                </p>
-                <span className="shrink-0 text-right text-[9.5px] text-zinc-500">
-                  {formatDateRange(e.startMonth, e.startYear, e.endMonth, e.endYear)}
-                </span>
+    education: () =>
+      educationEnabled ? (
+        <PlaceholderSection
+          key="education"
+          title="Education"
+          hasContent={education.length > 0}
+          placeholder="B.Tech Computer Science, VIT Vellore — Vellore, TN  |  9.1 CGPA  |  Aug 2021 – May 2025"
+        >
+          <div className="flex flex-col gap-[12px]">
+            {education.map((e) => (
+              <div key={e.id} className="flex flex-col gap-[2px]">
+                <div className="flex items-baseline justify-between gap-[16px]">
+                  <p className="min-w-0 flex-1 break-words font-bold text-black">
+                    {e.institution || "Institution"}
+                    {e.degree && <span className="font-normal text-zinc-800"> — {e.degree}{e.branch ? `, ${e.branch}` : ""}</span>}
+                  </p>
+                  <span className="shrink-0 text-right text-[9.5px] text-zinc-500">
+                    {formatDateRange(e.startMonth, e.startYear, e.endMonth, e.endYear)}
+                  </span>
+                </div>
+                {e.grade && <p className="text-[10px] text-zinc-600">{e.grade}</p>}
               </div>
-              {e.grade && <p className="text-[10px] text-zinc-600">{e.grade}</p>}
-            </div>
-          ))}
-        </div>
-      </PlaceholderSection>
-    ),
+            ))}
+          </div>
+        </PlaceholderSection>
+      ) : null,
 
     experience: () => (
       <PlaceholderSection

@@ -22,7 +22,9 @@ export const EMPTY_RESUME: Resume = {
     portfolio: "",
   },
   summary: { text: "" },
+  summaryEnabled: true,
   education: [],
+  educationEnabled: true,
   experience: [],
   projects: [],
   skills: [],
@@ -53,8 +55,8 @@ export const SECTION_META: Record<
   { label: string; optional?: boolean }
 > = {
   personal: { label: "Personal Details" },
-  summary: { label: "Professional Summary" },
-  education: { label: "Education" },
+  summary: { label: "Professional Summary", optional: true },
+  education: { label: "Education", optional: true },
   experience: { label: "Experience" },
   projects: { label: "Projects" },
   skills: { label: "Skills" },
@@ -185,7 +187,9 @@ export function mergeResumeWithDefaults(loaded: unknown, fallback: Resume): Resu
   return {
     personal: { ...fallback.personal, ...(l.personal ?? {}) },
     summary: { ...fallback.summary, ...(l.summary ?? {}) },
+    summaryEnabled: typeof l.summaryEnabled === "boolean" ? l.summaryEnabled : fallback.summaryEnabled,
     education: arrayOrFallback("education"),
+    educationEnabled: typeof l.educationEnabled === "boolean" ? l.educationEnabled : fallback.educationEnabled,
     experience: arrayOrFallback("experience"),
     projects: arrayOrFallback("projects"),
     skills: arrayOrFallback("skills"),

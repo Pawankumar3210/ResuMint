@@ -28,6 +28,7 @@ export function getSectionStatus(resume: Resume, section: SectionId): SectionSta
     }
 
     case "summary": {
+      if (!resume.summaryEnabled) return "empty";
       const len = resume.summary.text.trim().length;
       if (len === 0) return "empty";
       if (len < 50) return "partial";
@@ -35,6 +36,7 @@ export function getSectionStatus(resume: Resume, section: SectionId): SectionSta
     }
 
     case "education": {
+      if (!resume.educationEnabled) return "empty";
       if (resume.education.length === 0) return "empty";
       const complete = resume.education.every(
         (e) =>

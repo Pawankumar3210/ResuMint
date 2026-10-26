@@ -22,8 +22,8 @@ const ICONS: Record<string, LucideIcon> = {
 export function HeroSection() {
   return (
     <motion.section
-      exit={{ opacity: 0, y: -48 }}
-      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      exit={{ opacity: 0, y: -24, filter: "blur(6px)", position: "absolute", top: 0, left: 0, right: 0, pointerEvents: "none", zIndex: 10 }}
+      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
       className="flex min-h-[85vh] flex-col items-center justify-center gap-8 px-6 text-center"
     >
       <motion.div

@@ -21,6 +21,7 @@ export const DEMO_RESUME: Resume = {
   summary: {
     text: "Computer Science student at Sapthagiri NPS University with strong foundation in Data Structures, Algorithms, OOP and DBMS. Proficient in Java, Python, JavaScript, React and SQL with hands-on experience building responsive web applications and academic projects. Passionate about problem-solving, clean code and learning new technologies. Eager to contribute as a Software Developer in a growth-oriented team and build scalable, user-focused products.",
   },
+  summaryEnabled: true,
   education: [
     {
       id: "demo-edu-1",
@@ -34,6 +35,7 @@ export const DEMO_RESUME: Resume = {
       endYear: "2028",
     },
   ],
+  educationEnabled: true,
   experience: [
     {
       id: "demo-exp-1",

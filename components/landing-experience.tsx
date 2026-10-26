@@ -37,15 +37,15 @@ export function LandingExperience() {
     <div className="flex min-h-screen flex-1 flex-col">
       <Navbar showBrand={collapsed} />
 
-      <AnimatePresence mode="wait">
+      <AnimatePresence>
         {!collapsed && <HeroSection key="hero" />}
       </AnimatePresence>
 
       {collapsed && (
         <motion.main
-          initial={{ opacity: 0, y: 32 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.7, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
           className="mx-auto w-full max-w-[1600px] flex-1 px-6 pb-10 pt-20"
         >
           <div className="mb-8">

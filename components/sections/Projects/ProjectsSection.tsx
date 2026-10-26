@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { EntryCard } from "@/components/builder/entry-card";
 import { MAX_PROJECTS, MAX_PROJECT_DESCRIPTION_LENGTH } from "@/constants/resume-defaults";
-import { isValidUrl } from "@/utils/resumeValidation";
+import { cleanWhitespace, isValidUrl, normalizeProfileUrl } from "@/utils/resumeValidation";
 
 export function ProjectsSection() {
   const { resume, addProject, updateProject, removeProject, moveProject, duplicateProject } = useResume();
@@ -32,6 +32,7 @@ export function ProjectsSection() {
               label="Project Name"
               value={entry.name}
               onChange={(e) => updateProject(entry.id, { name: e.target.value })}
+              onBlur={() => updateProject(entry.id, { name: cleanWhitespace(entry.name) })}
               placeholder="CampusLink - College Social Graph"
             />
             <Textarea
@@ -42,6 +43,7 @@ export function ProjectsSection() {
                   description: e.target.value.slice(0, MAX_PROJECT_DESCRIPTION_LENGTH),
                 })
               }
+              onBlur={() => updateProject(entry.id, { description: cleanWhitespace(entry.description) })}
               maxLength={MAX_PROJECT_DESCRIPTION_LENGTH}
               rows={6}
               placeholder="Real-time feed and DMs, 1.2k MAU in first month. Optimized feed query from O(n^2) to O(n log n)."
@@ -64,6 +66,7 @@ export function ProjectsSection() {
                 type="text"
                 value={entry.techStack}
                 onChange={(e) => updateProject(entry.id, { techStack: e.target.value })}
+                onBlur={() => updateProject(entry.id, { techStack: cleanWhitespace(entry.techStack) })}
                 placeholder="React, Node.js, MongoDB"
                 className="h-11 min-w-0 flex-1 rounded-input border border-glass-border bg-transparent px-3.5 text-sm text-foreground
                            glass-surface placeholder:text-foreground-secondary/60
@@ -77,6 +80,14 @@ export function ProjectsSection() {
                 optional
                 value={entry.githubUrl}
                 onChange={(e) => updateProject(entry.id, { githubUrl: e.target.value })}
+                onPaste={(e) => {
+                  const pasted = e.clipboardData.getData("text");
+                  if (pasted && /^(https?:\/\/|www\.)/i.test(pasted.trim())) {
+                    e.preventDefault();
+                    updateProject(entry.id, { githubUrl: normalizeProfileUrl(pasted) });
+                  }
+                }}
+                onBlur={() => updateProject(entry.id, { githubUrl: normalizeProfileUrl(entry.githubUrl) })}
                 placeholder="github.com/aaravmehta/campuslink"
                 error={entry.githubUrl && !isValidUrl(entry.githubUrl) ? "Enter a valid URL." : undefined}
               />
@@ -85,6 +96,14 @@ export function ProjectsSection() {
                 optional
                 value={entry.liveUrl}
                 onChange={(e) => updateProject(entry.id, { liveUrl: e.target.value })}
+                onPaste={(e) => {
+                  const pasted = e.clipboardData.getData("text");
+                  if (pasted && /^(https?:\/\/|www\.)/i.test(pasted.trim())) {
+                    e.preventDefault();
+                    updateProject(entry.id, { liveUrl: normalizeProfileUrl(pasted) });
+                  }
+                }}
+                onBlur={() => updateProject(entry.id, { liveUrl: normalizeProfileUrl(entry.liveUrl) })}
                 placeholder="campuslink.app"
                 error={entry.liveUrl && !isValidUrl(entry.liveUrl) ? "Enter a valid URL." : undefined}
               />

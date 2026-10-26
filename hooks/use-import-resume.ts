@@ -96,8 +96,14 @@ export function useImportResume() {
         if (!isNonEmpty(next.personal[k]) && value) next.personal[k] = value as string;
       }
     }
-    if (selection.summary && result.data.summary) next.summary = result.data.summary;
-    if (selection.education && result.data.education) next.education = result.data.education;
+    if (selection.summary && result.data.summary) {
+      next.summary = result.data.summary;
+      next.summaryEnabled = true;
+    }
+    if (selection.education && result.data.education) {
+      next.education = result.data.education;
+      next.educationEnabled = true;
+    }
     if (selection.experience && result.data.experience) next.experience = result.data.experience;
     if (selection.projects && result.data.projects) next.projects = result.data.projects;
     if (selection.skills && result.data.skills) next.skills = result.data.skills;

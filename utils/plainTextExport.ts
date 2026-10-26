@@ -15,7 +15,9 @@ export function buildResumePlainText(resume: Resume): string {
   const {
     personal,
     summary,
+    summaryEnabled,
     education,
+    educationEnabled,
     experience,
     projects,
     skills,
@@ -49,13 +51,13 @@ export function buildResumePlainText(resume: Resume): string {
 
   const sectionBuilders: Record<ReorderableSectionId, () => void> = {
     summary: () => {
-      if (!summary.text.trim()) return;
+      if (!summaryEnabled || !summary.text.trim()) return;
       heading("Professional Summary");
       lines.push(summary.text.trim());
     },
 
     education: () => {
-      if (education.length === 0) return;
+      if (!educationEnabled || education.length === 0) return;
       heading("Education");
       education.forEach((e, i) => {
         if (i > 0) blank();

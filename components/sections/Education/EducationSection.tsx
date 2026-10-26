@@ -7,14 +7,35 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { EntryCard } from "@/components/builder/entry-card";
+import { CollapsibleReveal } from "@/components/ui/collapsible-reveal";
 import { MONTH_OPTIONS, YEAR_OPTIONS } from "@/constants/resume-defaults";
 
 export function EducationSection() {
-  const { resume, addEducation, updateEducation, removeEducation, moveEducation, duplicateEducation } = useResume();
+  const {
+    resume,
+    addEducation,
+    updateEducation,
+    removeEducation,
+    moveEducation,
+    duplicateEducation,
+    setEducationEnabled,
+  } = useResume();
 
   return (
     <div className="flex flex-col gap-4">
-      <AnimatePresence initial={false}>
+      <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground transition-colors hover:text-primary">
+        <input
+          type="checkbox"
+          checked={resume.educationEnabled}
+          onChange={(e) => setEducationEnabled(e.target.checked)}
+          className="h-4 w-4 rounded accent-primary transition-transform"
+        />
+        Include an education section on my resume
+      </label>
+
+      <CollapsibleReveal show={resume.educationEnabled}>
+        <div className="flex flex-col gap-4">
+          <AnimatePresence initial={false}>
         {resume.education.map((entry, index) => (
           <EntryCard
             key={entry.id}
@@ -83,6 +104,8 @@ export function EducationSection() {
       <Button variant="secondary" size="sm" onClick={addEducation} className="self-start">
         <Plus size={15} /> Add Education
       </Button>
+        </div>
+      </CollapsibleReveal>
     </div>
   );
 }

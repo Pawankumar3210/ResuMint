@@ -57,6 +57,13 @@ export function PersonalDetailsSection() {
         optional
         value={p.linkedin}
         onChange={(e) => updatePersonal({ linkedin: e.target.value })}
+        onPaste={(e) => {
+          const pasted = e.clipboardData.getData("text");
+          if (pasted && /^(https?:\/\/|www\.)/i.test(pasted.trim())) {
+            e.preventDefault();
+            updatePersonal({ linkedin: normalizeProfileUrl(pasted) });
+          }
+        }}
         onBlur={() => updatePersonal({ linkedin: normalizeProfileUrl(p.linkedin) })}
         placeholder="linkedin.com/in/aaravmehta"
         error={p.linkedin && !isValidUrl(p.linkedin) ? "Enter a valid URL." : undefined}
@@ -66,6 +73,13 @@ export function PersonalDetailsSection() {
         optional
         value={p.github}
         onChange={(e) => updatePersonal({ github: e.target.value })}
+        onPaste={(e) => {
+          const pasted = e.clipboardData.getData("text");
+          if (pasted && /^(https?:\/\/|www\.)/i.test(pasted.trim())) {
+            e.preventDefault();
+            updatePersonal({ github: normalizeProfileUrl(pasted) });
+          }
+        }}
         onBlur={() => updatePersonal({ github: normalizeProfileUrl(p.github) })}
         placeholder="github.com/aaravmehta"
         error={p.github && !isValidUrl(p.github) ? "Enter a valid URL." : undefined}
@@ -75,6 +89,13 @@ export function PersonalDetailsSection() {
         optional
         value={p.portfolio}
         onChange={(e) => updatePersonal({ portfolio: e.target.value })}
+        onPaste={(e) => {
+          const pasted = e.clipboardData.getData("text");
+          if (pasted && /^(https?:\/\/|www\.)/i.test(pasted.trim())) {
+            e.preventDefault();
+            updatePersonal({ portfolio: normalizeProfileUrl(pasted) });
+          }
+        }}
         onBlur={() => updatePersonal({ portfolio: normalizeProfileUrl(p.portfolio) })}
         placeholder="aaravmehta.dev"
         error={p.portfolio && !isValidUrl(p.portfolio) ? "Enter a valid URL." : undefined}

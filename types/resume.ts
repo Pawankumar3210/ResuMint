@@ -118,7 +118,9 @@ export interface CustomSection {
 export interface Resume {
   personal: PersonalDetails;
   summary: ProfessionalSummary;
+  summaryEnabled: boolean;
   education: EducationEntry[];
+  educationEnabled: boolean;
   experience: ExperienceEntry[];
   projects: ProjectEntry[];
   skills: SkillItem[];

@@ -44,7 +44,9 @@ export function ResumePdfDocument({ resume, layout }: { resume: Resume; layout: 
   const {
     personal,
     summary,
+    summaryEnabled,
     education,
+    educationEnabled,
     experience,
     projects,
     skills,
@@ -67,14 +69,14 @@ export function ResumePdfDocument({ resume, layout }: { resume: Resume; layout: 
 
   const sectionRenderers: Record<ReorderableSectionId, () => React.ReactNode> = {
     summary: () =>
-      summary.text.trim() ? (
+      summaryEnabled && summary.text.trim() ? (
         <Section key="summary" title="Professional Summary" s={s}>
           <Text style={s.body}>{summary.text}</Text>
         </Section>
       ) : null,
 
     education: () =>
-      education.length > 0 ? (
+      educationEnabled && education.length > 0 ? (
         <Section key="education" title="Education" s={s}>
           {education.map((e) => (
             <View key={e.id} style={s.entry} wrap={false}>

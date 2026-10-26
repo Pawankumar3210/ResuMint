@@ -58,23 +58,23 @@ export function BuilderPreviewPanels() {
             `will-change-transform` avoids a layout repaint hitch on
             lower-end devices during the (brief) animated phase. */}
         <motion.div
-          initial={{ opacity: 0, x: -28, filter: "blur(6px)" }}
-          animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-          transition={{ duration: 0.65, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+          initial={{ opacity: 0, x: -56 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.95, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
           className={cn(
             "h-full min-h-0 will-change-transform lg:col-span-2 lg:block",
-            mobileTab === "builder" ? "block" : "hidden"
+            mobileTab === "builder" ? "block animate-slide-in-left" : "hidden"
           )}
         >
           <ResumeBuilder />
         </motion.div>
         <motion.div
-          initial={{ opacity: 0, x: 28, filter: "blur(6px)" }}
-          animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-          transition={{ duration: 0.65, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          initial={{ opacity: 0, x: 56 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1.05, delay: 0.28, ease: [0.16, 1, 0.3, 1] }}
           className={cn(
             "h-full min-h-0 will-change-transform lg:col-span-3 lg:block",
-            mobileTab === "preview" ? "block" : "hidden"
+            mobileTab === "preview" ? "block animate-slide-in-right" : "hidden"
           )}
         >
           <GlassCard className="h-full min-h-0 overflow-hidden">
