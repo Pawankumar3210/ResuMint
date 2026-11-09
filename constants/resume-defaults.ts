@@ -48,6 +48,7 @@ export const EMPTY_RESUME: Resume = {
   custom: { enabled: false, title: "", body: "" },
   custom2: { enabled: false, title: "", body: "" },
   sectionOrder: DEFAULT_SECTION_ORDER,
+  onePageFit: false,
 };
 
 export const SECTION_META: Record<
@@ -205,6 +206,7 @@ export function mergeResumeWithDefaults(loaded: unknown, fallback: Resume): Resu
     custom: { ...fallback.custom, ...(l.custom ?? {}) },
     custom2: { ...fallback.custom2, ...(l.custom2 ?? {}) },
     sectionOrder: normalizeSectionOrder(l.sectionOrder),
+    onePageFit: typeof l.onePageFit === "boolean" ? l.onePageFit : fallback.onePageFit ?? false,
   };
 }
 

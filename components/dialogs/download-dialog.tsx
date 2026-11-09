@@ -100,18 +100,36 @@ export function DownloadDialog({
           options={[
             { value: "pdf", label: "PDF" },
             { value: "docx", label: "DOCX" },
+            { value: "json", label: "JSON" },
           ]}
         />
 
-        <SegmentedControl
-          label="Pages"
-          value={layout}
-          onChange={setLayout}
-          options={[
-            { value: "one", label: "One Page" },
-            { value: "two", label: "Two Pages" },
-          ]}
-        />
+        {format !== "json" && (
+          <SegmentedControl
+            label="Pages"
+            value={layout}
+            onChange={setLayout}
+            options={[
+              { value: "one", label: "One Page" },
+              { value: "two", label: "Two Pages" },
+            ]}
+          />
+        )}
+
+        {format === "json" && (
+          <p className="rounded-input border border-glass-border bg-muted/40 px-3.5 py-2.5 text-xs text-foreground-secondary">
+            Exports as the open-standard{" "}
+            <a
+              href="https://jsonresume.org/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-foreground"
+            >
+              JSON Resume
+            </a>{" "}
+            format. Perfect for backups, moving between devices, or importing back into ResuMint.
+          </p>
+        )}
 
         {error && <p className="text-sm text-error">{error}</p>}
 

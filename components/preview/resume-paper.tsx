@@ -77,7 +77,37 @@ export function ResumePaper({ resume }: { resume: Resume }) {
     custom,
     custom2,
     sectionOrder,
+    onePageFit,
   } = resume;
+
+  // Compact spacing values for 1-page fit mode -- mirrors the PDF
+  // renderer's "compact" style set so the preview is an accurate proxy.
+  const fit = onePageFit;
+  const articleClass = fit
+    ? "resume-paper relative flex aspect-[210/297] w-full shrink-0 flex-col gap-[14px] px-[36px] py-[36px] font-resume text-[10.5px] leading-[1.5] text-zinc-800"
+    : "resume-paper relative flex aspect-[210/297] w-full shrink-0 flex-col gap-[24px] px-[40px] py-[48px] font-resume text-[12px] leading-[1.6] text-zinc-800";
+  const sectionGap = fit ? "gap-[6px]" : "gap-[8px]";
+  const entryGap = fit ? "gap-[10px]" : "gap-[12px]";
+  const entryInnerGap = fit ? "gap-[1px]" : "gap-[2px]";
+  const bodyEntryGap = fit ? "gap-[12px]" : "gap-[16px]";
+  const skillGap = fit ? "gap-[3px]" : "gap-[4px]";
+  const certGap = fit ? "gap-[4px]" : "gap-[6px]";
+  const headerGap = fit ? "gap-[4px]" : "gap-[6px]";
+  const nameFontClass = fit ? "text-[17px]" : "text-[20px]";
+  const contactFontClass = fit ? "text-[8px]" : "text-[9px]";
+  const sectionTitleClass = fit
+    ? "border-b-[2px] border-black pb-[5px] text-[11.5px] font-bold uppercase tracking-[0.14em] text-black"
+    : "border-b-[2px] border-black pb-[8px] text-[13px] font-bold uppercase tracking-[0.14em] text-black";
+  const dateClass = fit ? "shrink-0 text-right text-[8.5px] text-zinc-500" : "shrink-0 text-right text-[9.5px] text-zinc-500";
+  const gradeClass = fit ? "text-[9px] text-zinc-600" : "text-[10px] text-zinc-600";
+  const expTypeClass = fit ? "text-[9px] text-zinc-500" : "text-[10px] text-zinc-500";
+  const techStackClass = fit ? "text-[9.5px] text-zinc-600" : "text-[10.5px] text-zinc-600";
+  const skillLabelClass = fit ? "text-[9.5px]" : "text-[10px]";
+  const sigClass = fit ? "text-[8px]" : "text-[9px]";
+  const headerPbClass = fit ? "pb-[6px]" : "pb-[8px]";
+  const decSignatureGap = fit ? "mt-[8px]" : "mt-[12px]";
+  const decSignatureWidth = fit ? "w-[120px]" : "w-[144px]";
+  const decSignatureSpacer = fit ? "h-[18px]" : "h-[24px]";
 
   const realContact = joinNonEmpty(
     [personal.email, personal.phone, personal.location, personal.linkedin, personal.github, personal.portfolio],
@@ -92,6 +122,8 @@ export function ResumePaper({ resume }: { resume: Resume }) {
           title="Professional Summary"
           hasContent={summary.text.trim().length > 0}
           placeholder="Concise 3-4 line professional summary with metrics and intent. E.g. CS undergrad with X, built Y used by Z users, seeking..."
+          sectionGap={sectionGap}
+          sectionTitleClass={sectionTitleClass}
         >
           <p>{summary.text}</p>
         </PlaceholderSection>
@@ -104,20 +136,22 @@ export function ResumePaper({ resume }: { resume: Resume }) {
           title="Education"
           hasContent={education.length > 0}
           placeholder="B.Tech Computer Science, VIT Vellore — Vellore, TN  |  9.1 CGPA  |  Aug 2021 – May 2025"
+          sectionGap={sectionGap}
+          sectionTitleClass={sectionTitleClass}
         >
-          <div className="flex flex-col gap-[12px]">
+          <div className={`flex flex-col ${entryGap}`}>
             {education.map((e) => (
-              <div key={e.id} className="flex flex-col gap-[2px]">
+              <div key={e.id} className={`flex flex-col ${entryInnerGap}`}>
                 <div className="flex items-baseline justify-between gap-[16px]">
                   <p className="min-w-0 flex-1 break-words font-bold text-black">
                     {e.institution || "Institution"}
                     {e.degree && <span className="font-normal text-zinc-800"> — {e.degree}{e.branch ? `, ${e.branch}` : ""}</span>}
                   </p>
-                  <span className="shrink-0 text-right text-[9.5px] text-zinc-500">
+                  <span className={dateClass}>
                     {formatDateRange(e.startMonth, e.startYear, e.endMonth, e.endYear)}
                   </span>
                 </div>
-                {e.grade && <p className="text-[10px] text-zinc-600">{e.grade}</p>}
+                {e.grade && <p className={gradeClass}>{e.grade}</p>}
               </div>
             ))}
           </div>
@@ -130,19 +164,21 @@ export function ResumePaper({ resume }: { resume: Resume }) {
         title="Experience"
         hasContent={experience.length > 0}
         placeholder="Add internships, leadership, or work. Use bullet points starting with verbs and include numbers."
+        sectionGap={sectionGap}
+        sectionTitleClass={sectionTitleClass}
       >
-        <div className="flex flex-col gap-[16px]">
+        <div className={`flex flex-col ${bodyEntryGap}`}>
           {experience.map((e) => (
-            <div key={e.id} className="flex flex-col gap-[2px]">
+            <div key={e.id} className={`flex flex-col ${entryInnerGap}`}>
               <div className="flex items-baseline justify-between gap-[16px]">
                 <p className="min-w-0 flex-1 break-words font-bold text-black">
                   {e.role || "Role"} {e.organization && <span className="font-normal text-zinc-800">— {e.organization}</span>}
                 </p>
-                <span className="shrink-0 text-right text-[9.5px] text-zinc-500">
+                <span className={dateClass}>
                   {formatDateRange(e.startMonth, e.startYear, e.endMonth, e.endYear, e.current)}
                 </span>
               </div>
-              <p className="text-[10px] text-zinc-500">{e.type}</p>
+              <p className={expTypeClass}>{e.type}</p>
               {e.description && <p className="whitespace-pre-line">{e.description}</p>}
             </div>
           ))}
@@ -156,19 +192,21 @@ export function ResumePaper({ resume }: { resume: Resume }) {
         title="Projects"
         hasContent={projects.length > 0}
         placeholder="Show 2-3 of your best projects with the stack used and a link. Focus on impact."
+        sectionGap={sectionGap}
+        sectionTitleClass={sectionTitleClass}
       >
-        <div className="flex flex-col gap-[12px]">
+        <div className={`flex flex-col ${entryGap}`}>
           {projects.map((p) => (
-            <div key={p.id} className="flex flex-col gap-[2px]">
+            <div key={p.id} className={`flex flex-col ${entryInnerGap}`}>
               <div className="flex items-baseline justify-between gap-[16px]">
                 <p className="min-w-0 flex-1 break-words font-bold text-black">{p.name || "Project"}</p>
-                <span className="shrink-0 text-right text-[9.5px] text-zinc-500 break-all">
+                <span className={`shrink-0 text-right break-all ${dateClass}`}>
                   {joinNonEmpty([p.githubUrl, p.liveUrl])}
                 </span>
               </div>
               {p.description && <p>{p.description}</p>}
               {p.techStack?.trim() && (
-                <p className="text-[10.5px] text-zinc-600">
+                <p className={techStackClass}>
                   <span className="font-semibold text-zinc-700">Tech Stack: </span>
                   {p.techStack}
                 </p>
@@ -185,13 +223,15 @@ export function ResumePaper({ resume }: { resume: Resume }) {
         title="Skills"
         hasContent={skills.length > 0}
         placeholder="Languages: JavaScript, Python...  |  Frameworks: React, Node...  |  Tools: Git, Docker..."
+        sectionGap={sectionGap}
+        sectionTitleClass={sectionTitleClass}
       >
-        <div className="flex flex-col gap-[4px]">
+        <div className={`flex flex-col ${skillGap}`}>
           {SKILL_CATEGORIES.map((category: SkillCategory) => {
             const items = skills.filter((s) => s.category === category);
             if (items.length === 0) return null;
             return (
-              <p key={category}>
+              <p key={category} className={skillLabelClass}>
                 <span className="font-bold text-black">{SKILL_CATEGORY_META[category].label}: </span>
                 {items.map((s) => s.label).join(", ")}
               </p>
@@ -208,15 +248,17 @@ export function ResumePaper({ resume }: { resume: Resume }) {
           title="Certifications"
           hasContent={certifications.length > 0}
           placeholder="AWS Certified Developer — Amazon (2024)  |  Winner, Smart India Hackathon (2023)"
+          sectionGap={sectionGap}
+          sectionTitleClass={sectionTitleClass}
         >
-          <div className="flex flex-col gap-[6px]">
+          <div className={`flex flex-col ${certGap}`}>
             {certifications.map((c) => (
               <div key={c.id} className="flex items-baseline justify-between gap-[16px]">
                 <p className="min-w-0 flex-1 break-words font-bold text-black">
                   {c.name || "Certification"}
                   {c.organization && <span className="font-normal text-zinc-800"> — {c.organization}</span>}
                 </p>
-                <span className="shrink-0 text-right text-[9.5px] text-zinc-500">
+                <span className={dateClass}>
                   {joinNonEmpty([c.month, c.year])}
                 </span>
               </div>
@@ -232,8 +274,10 @@ export function ResumePaper({ resume }: { resume: Resume }) {
           title="Achievements"
           hasContent={achievements.length > 0}
           placeholder="Add awards, honors, or competition wins."
+          sectionGap={sectionGap}
+          sectionTitleClass={sectionTitleClass}
         >
-          <ul className="flex flex-col gap-[4px]">
+          <ul className={`flex flex-col ${skillGap}`}>
             {achievements.map((a) => (
               <li key={a.id} className="flex gap-[8px]">
                 <span aria-hidden="true">•</span>
@@ -251,6 +295,8 @@ export function ResumePaper({ resume }: { resume: Resume }) {
           title="Languages"
           hasContent={languages.length > 0}
           placeholder="e.g. English, Hindi"
+          sectionGap={sectionGap}
+          sectionTitleClass={sectionTitleClass}
         >
           <p>{languages.map((l) => l.label).join(", ")}</p>
         </PlaceholderSection>
@@ -258,11 +304,11 @@ export function ResumePaper({ resume }: { resume: Resume }) {
 
     declaration: () =>
       declaration.enabled && declaration.text.trim() ? (
-        <Section key="declaration" title="Declaration">
+        <Section key="declaration" title="Declaration" sectionGap={sectionGap} sectionTitleClass={sectionTitleClass}>
           <p>{declaration.text}</p>
           {(declaration.showPlace || declaration.showDate || declaration.showSignature) && (
             <div
-              className={`mt-[12px] flex items-end gap-[24px] ${
+              className={`${decSignatureGap} flex items-end gap-[24px] ${
                 (declaration.showPlace || declaration.showDate) && declaration.showSignature
                   ? "justify-between"
                   : declaration.showSignature
@@ -271,22 +317,22 @@ export function ResumePaper({ resume }: { resume: Resume }) {
               }`}
             >
               {(declaration.showPlace || declaration.showDate) && (
-                <div className="flex flex-col gap-[2px] text-[10px] text-zinc-600">
+                <div className={`flex flex-col gap-[2px] ${gradeClass}`}>
                   {declaration.showPlace && <p>Place: {declaration.place || "_______________"}</p>}
                   {declaration.showDate && <p>Date: {declaration.date || "_______________"}</p>}
                 </div>
               )}
               {declaration.showSignature && (
-                <div className="flex w-[144px] flex-col items-center gap-[4px] text-center">
+                <div className={`flex ${decSignatureWidth} flex-col items-center gap-[4px] text-center`}>
                   {declaration.showSignatureName && declaration.signatureName?.trim() ? (
                     <p className="w-full truncate font-semibold italic text-black">
                       {declaration.signatureName}
                     </p>
                   ) : (
-                    <div className="h-[24px] w-full" />
+                    <div className={`${decSignatureSpacer} w-full`} />
                   )}
                   <div className="w-full border-t border-black/50" />
-                  <p className="text-[9px] uppercase tracking-[0.12em] text-zinc-500">Signature</p>
+                  <p className={`${sigClass} uppercase tracking-[0.12em] text-zinc-500`}>Signature</p>
                 </div>
               )}
             </div>
@@ -296,14 +342,14 @@ export function ResumePaper({ resume }: { resume: Resume }) {
 
     custom: () =>
       custom.enabled && (custom.title.trim() || custom.body.trim()) ? (
-        <Section key="custom" title={custom.title || "Custom Section"}>
+        <Section key="custom" title={custom.title || "Custom Section"} sectionGap={sectionGap} sectionTitleClass={sectionTitleClass}>
           <p className="whitespace-pre-line">{custom.body}</p>
         </Section>
       ) : null,
 
     custom2: () =>
       custom2.enabled && (custom2.title.trim() || custom2.body.trim()) ? (
-        <Section key="custom2" title={custom2.title || "Custom Section"}>
+        <Section key="custom2" title={custom2.title || "Custom Section"} sectionGap={sectionGap} sectionTitleClass={sectionTitleClass}>
           <p className="whitespace-pre-line">{custom2.body}</p>
         </Section>
       ) : null,
@@ -311,24 +357,24 @@ export function ResumePaper({ resume }: { resume: Resume }) {
 
   return (
     <article
-      className="resume-paper relative flex aspect-[210/297] w-full shrink-0 flex-col gap-[24px] px-[40px] py-[48px] font-resume text-[12px] leading-[1.6] text-zinc-800"
+      className={articleClass}
       style={{ fontFamily: "var(--font-resume)" }}
     >
       {/* Header -- centered per spec */}
-      <header className="flex flex-col items-center gap-[6px] pb-[8px] text-center">
+      <header className={`flex flex-col items-center ${headerGap} ${headerPbClass} text-center`}>
         <PlaceholderText
           as="h1"
           value={personal.fullName}
           placeholder="Your Full Name"
           transform="uppercase"
-          className="text-[20px] font-bold tracking-[-0.02em]"
+          className={`${nameFontClass} font-bold tracking-[-0.02em]`}
           placeholderClassName="text-zinc-400"
           realClassName="text-black"
         />
         <PlaceholderText
           value={realContact}
           placeholder="email  |  phone  |  linkedin  |  github  |  location"
-          className="text-[9px]"
+          className={contactFontClass}
           placeholderClassName="text-zinc-400"
           realClassName="text-zinc-600"
         />
@@ -339,11 +385,21 @@ export function ResumePaper({ resume }: { resume: Resume }) {
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+  title,
+  children,
+  sectionGap = "gap-[8px]",
+  sectionTitleClass = "border-b-[2px] border-black pb-[8px] text-[13px] font-bold uppercase tracking-[0.14em] text-black",
+}: {
+  title: string;
+  children: React.ReactNode;
+  sectionGap?: string;
+  sectionTitleClass?: string;
+}) {
   return (
-    <section className="flex flex-col gap-[8px] break-inside-avoid print:break-inside-avoid">
+    <section className={`flex flex-col ${sectionGap} break-inside-avoid print:break-inside-avoid`}>
       <h2
-        className="border-b-[2px] border-black pb-[8px] text-[13px] font-bold uppercase tracking-[0.14em] text-black"
+        className={sectionTitleClass}
         style={{ borderBottomColor: "#000000", borderBottomWidth: "2px", borderBottomStyle: "solid" }}
       >
         {title}
@@ -364,16 +420,20 @@ function PlaceholderSection({
   hasContent,
   placeholder,
   children,
+  sectionGap = "gap-[8px]",
+  sectionTitleClass = "border-b-[2px] border-black pb-[8px] text-[13px] font-bold uppercase tracking-[0.14em] text-black",
 }: {
   title: string;
   hasContent: boolean;
   placeholder: string;
   children: React.ReactNode;
+  sectionGap?: string;
+  sectionTitleClass?: string;
 }) {
   return (
-    <section className="flex flex-col gap-[8px] break-inside-avoid print:break-inside-avoid">
+    <section className={`flex flex-col ${sectionGap} break-inside-avoid print:break-inside-avoid`}>
       <h2
-        className="border-b-[2px] border-black pb-[8px] text-[13px] font-bold uppercase tracking-[0.14em] text-black"
+        className={sectionTitleClass}
         style={{ borderBottomColor: "#000000", borderBottomWidth: "2px", borderBottomStyle: "solid" }}
       >
         {title}

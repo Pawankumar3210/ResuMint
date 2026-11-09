@@ -90,6 +90,8 @@ export interface ResumeContextValue {
    *  isn't part of sectionOrder at all (see types/resume.ts). */
   moveSection: (id: ReorderableSectionId, direction: "up" | "down") => void;
 
+  setOnePageFit: (enabled: boolean) => void;
+
   setResume: (resume: Resume) => void;
   clearResume: () => void;
   undo: () => void;
@@ -506,6 +508,8 @@ export function ResumeProvider({ children }: { children: React.ReactNode }) {
       updateCustomSection: (patch) => patchField("custom", patch),
       updateCustomSection2: (patch) => patchField("custom2", patch),
       moveSection,
+
+      setOnePageFit: (enabled) => commit((prev) => ({ ...prev, onePageFit: enabled })),
 
       setResume: (next) => commit(() => next, { discrete: true }),
       clearResume: () => commit(() => EMPTY_RESUME, { discrete: true }),

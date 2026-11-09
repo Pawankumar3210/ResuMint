@@ -42,7 +42,7 @@ export function ImportResumeDialog({ open, onClose }: { open: boolean; onClose: 
     <Dialog open={open} onClose={handleClose} title="Import Resume">
       <h2 className="mb-1 text-lg font-semibold tracking-tight text-foreground">Import Resume</h2>
       <p className="mb-6 text-sm text-foreground-secondary">
-        Upload an existing PDF or DOCX resume. We&apos;ll pull out what we can find -- you
+        Upload an existing PDF, DOCX, or JSON Resume file. We&apos;ll pull out what we can find -- you
         choose what to bring in before anything changes.
       </p>
 
@@ -59,11 +59,11 @@ export function ImportResumeDialog({ open, onClose }: { open: boolean; onClose: 
         >
           <Upload size={24} className="text-foreground-secondary" />
           <p className="text-sm text-foreground">Click to upload, or drag a file here</p>
-          <p className="text-xs text-foreground-secondary">PDF or DOCX</p>
+          <p className="text-xs text-foreground-secondary">PDF, DOCX, or JSON Resume</p>
           <input
             ref={fileInputRef}
             type="file"
-            accept=".pdf,.docx"
+            accept=".pdf,.docx,.json"
             className="hidden"
             onChange={(e) => {
               const file = e.target.files?.[0];

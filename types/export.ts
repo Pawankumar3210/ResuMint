@@ -1,2 +1,2 @@
-export type ExportFormat = "pdf" | "docx";
+export type ExportFormat = "pdf" | "docx" | "json";
 export type PageLayout = "one" | "two";

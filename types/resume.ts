@@ -153,6 +153,9 @@ export interface Resume {
    *  "personal", so existing resumes keep their current visual order
    *  unchanged until the person deliberately reorders something. */
   sectionOrder: ReorderableSectionId[];
+  /** When enabled, applies compact spacing, margins, and typography
+   *  calibrated to fit content onto a single physical page. */
+  onePageFit: boolean;
 }
 
 export const SECTION_IDS = [

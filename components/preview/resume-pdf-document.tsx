@@ -40,7 +40,7 @@ Font.registerHyphenationCallback((word) => [word]);
  * the "best-effort" framing above.
  */
 export function ResumePdfDocument({ resume, layout }: { resume: Resume; layout: PageLayout }) {
-  const s = layout === "one" ? styles.compact : styles.normal;
+  const s = layout === "one" || resume.onePageFit ? styles.compact : styles.normal;
   const {
     personal,
     summary,

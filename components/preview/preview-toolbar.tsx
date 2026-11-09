@@ -1,9 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Trash2, Download, Sparkles, Loader2 } from "lucide-react";
+import { Trash2, Download, Sparkles, Loader2, AlignJustify } from "lucide-react";
 import { useDemoResume } from "@/hooks/use-demo-resume";
 import { useToast } from "@/hooks/use-toast";
+import { useResume } from "@/hooks/use-resume";
+import { cn } from "@/lib/utils";
 
 export function PreviewToolbar({
   onDownloadClick,
@@ -14,6 +16,7 @@ export function PreviewToolbar({
 }) {
   const { loadDemoResume, isLoadingDemo } = useDemoResume();
   const { showToast } = useToast();
+  const { resume, setOnePageFit } = useResume();
 
   const handleDemo = () => {
     loadDemoResume().then(() => showToast("Demo Loaded", "success"));
@@ -51,6 +54,24 @@ export function PreviewToolbar({
           {isLoadingDemo ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
           <span className="hidden sm:inline">{isLoadingDemo ? "Loading..." : "Try Demo Resume"}</span>
         </button>
+
+        {/* Snap to 1 Page toggle -- compact styling that shows active state clearly */}
+        <button
+          type="button"
+          onClick={() => setOnePageFit(!resume.onePageFit)}
+          aria-label={resume.onePageFit ? "Disable 1-page fit" : "Snap to 1 page"}
+          title={resume.onePageFit ? "1-Page Fit: ON — click to disable" : "Snap content to fit 1 page"}
+          className={cn(
+            "flex items-center gap-1.5 rounded-button border px-2.5 py-1.5 text-xs font-medium transition-all sm:px-3",
+            resume.onePageFit
+              ? "border-primary/60 bg-primary/10 text-primary hover:bg-primary/20"
+              : "border-glass-border text-foreground-secondary hover:border-primary/40 hover:text-foreground"
+          )}
+        >
+          <AlignJustify size={13} />
+          <span className="hidden sm:inline">1-Page Fit</span>
+        </button>
+
         <button
           type="button"
           onClick={onClearClick}

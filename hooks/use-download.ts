@@ -47,7 +47,7 @@ export function useDownload() {
           const blob = await generateResumePdfBlob(resume, layout);
           downloadBlob(blob, `${safeName}.pdf`);
           setLastDownloadedFile(`${safeName}.pdf`);
-        } else {
+        } else if (format === "docx") {
           const [{ buildResumeDocx }, { Packer }] = await Promise.all([
             import("@/utils/docxExport"),
             import("docx"),
@@ -56,6 +56,10 @@ export function useDownload() {
           const blob = await Packer.toBlob(doc);
           downloadBlob(blob, `${safeName}.docx`);
           setLastDownloadedFile(`${safeName}.docx`);
+        } else if (format === "json") {
+          const { downloadJsonResume } = await import("@/utils/jsonResume");
+          downloadJsonResume(resume, safeName);
+          setLastDownloadedFile(`${safeName}.json`);
         }
         return true;
       } catch {

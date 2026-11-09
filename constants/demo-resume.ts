@@ -133,4 +133,5 @@ export const DEMO_RESUME: Resume = {
   },
   custom2: { enabled: false, title: "", body: "" },
   sectionOrder: DEFAULT_SECTION_ORDER,
+  onePageFit: false,
 };

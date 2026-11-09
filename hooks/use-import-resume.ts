@@ -46,8 +46,17 @@ export function useImportResume() {
       setStage("parsing");
       setErrorMessage(null);
       try {
-        const text = await extractRawText(file);
-        const parsed = parseResumeText(text);
+        let parsed;
+        if (file.name.toLowerCase().endsWith(".json")) {
+          // JSON Resume import -- dynamically imported, same lazy-loading
+          // pattern as PDF/DOCX to keep it out of the initial bundle.
+          const { parseJsonResume } = await import("@/utils/jsonResume");
+          const text = await file.text();
+          parsed = parseJsonResume(text);
+        } else {
+          const text = await extractRawText(file);
+          parsed = parseResumeText(text);
+        }
         setResult(parsed);
 
         // Default-check only sections that (a) were actually detected and
@@ -66,7 +75,7 @@ export function useImportResume() {
         setSelection(defaults);
         setStage("preview");
       } catch {
-        setErrorMessage("Unable to import this resume. Please try another PDF or DOCX.");
+        setErrorMessage("Unable to import this resume. Please try another PDF, DOCX, or JSON file.");
         setStage("error");
       }
     },
