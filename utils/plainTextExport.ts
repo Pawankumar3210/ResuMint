@@ -1,6 +1,4 @@
 import type { Resume, ReorderableSectionId } from "@/types/resume";
-import { SKILL_CATEGORIES } from "@/types/resume";
-import { SKILL_CATEGORY_META } from "@/constants/resume-defaults";
 import { formatDateRange, joinNonEmpty } from "@/utils/helpers";
 
 /**
@@ -30,6 +28,7 @@ export function buildResumePlainText(resume: Resume): string {
     declaration,
     custom,
     custom2,
+    custom3,
     sectionOrder,
   } = resume;
 
@@ -96,10 +95,10 @@ export function buildResumePlainText(resume: Resume): string {
     skills: () => {
       if (skills.length === 0) return;
       heading("Skills");
-      SKILL_CATEGORIES.forEach((category) => {
-        const items = skills.filter((s) => s.category === category);
+      (resume.skillCategories ?? []).forEach((cat) => {
+        const items = skills.filter((s) => s.category === cat.id);
         if (items.length === 0) return;
-        lines.push(`${SKILL_CATEGORY_META[category].label}: ${items.map((s) => s.label).join(", ")}`);
+        lines.push(`${cat.label}: ${items.map((s) => s.label).join(", ")}`);
       });
     },
 
@@ -152,8 +151,14 @@ export function buildResumePlainText(resume: Resume): string {
 
     custom2: () => {
       if (!custom2.enabled || !(custom2.title.trim() || custom2.body.trim())) return;
-      heading(custom2.title || "Custom Section");
+      heading(custom2.title || "Custom Section 2");
       if (custom2.body.trim()) lines.push(custom2.body.trim());
+    },
+
+    custom3: () => {
+      if (!custom3.enabled || !(custom3.title.trim() || custom3.body.trim())) return;
+      heading(custom3.title || "Custom Section 3");
+      if (custom3.body.trim()) lines.push(custom3.body.trim());
     },
   };
 

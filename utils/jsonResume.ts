@@ -1,6 +1,5 @@
 import type { Resume, EducationEntry, ExperienceEntry, ProjectEntry, SkillItem, CertificationEntry, AchievementEntry, LanguageItem } from "@/types/resume";
 import { ExperienceType, SKILL_CATEGORIES } from "@/types/resume";
-import { SKILL_CATEGORY_META } from "@/constants/resume-defaults";
 import { createId } from "@/lib/id";
 import { downloadBlob } from "@/lib/download-file";
 import type { ParsedResumeResult } from "./resumeParser";
@@ -103,9 +102,9 @@ export function exportToJsonResume(resume: Resume): Record<string, unknown> {
             : undefined,
         }))
       : [],
-    skills: SKILL_CATEGORIES.filter((cat) => (skillsByCategory[cat] ?? []).length > 0).map((cat) => ({
-      name: SKILL_CATEGORY_META[cat]?.label || cat,
-      keywords: skillsByCategory[cat],
+    skills: (resume.skillCategories ?? []).filter((cat) => (skillsByCategory[cat.id] ?? []).length > 0).map((cat) => ({
+      name: cat.label,
+      keywords: skillsByCategory[cat.id],
     })),
     projects: projects.map((p) => ({
       name: p.name,
@@ -177,6 +176,7 @@ export function parseJsonResume(jsonString: string): ParsedResumeResult {
       achievementsEnabled: typeof r.achievementsEnabled === "boolean" ? r.achievementsEnabled : true,
       languages: Array.isArray(r.languages) ? (r.languages as LanguageItem[]) : [],
       languagesEnabled: typeof r.languagesEnabled === "boolean" ? r.languagesEnabled : true,
+      template: r.template === "modern" ? "modern" : "classic",
     };
     const skillCount = (data.skills ?? []).length;
     return {

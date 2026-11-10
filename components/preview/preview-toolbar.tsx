@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Trash2, Download, Sparkles, Loader2, AlignJustify } from "lucide-react";
+import { Trash2, Download, Sparkles, Loader2, AlignJustify, FileText, Columns2 } from "lucide-react";
 import { useDemoResume } from "@/hooks/use-demo-resume";
 import { useToast } from "@/hooks/use-toast";
 import { useResume } from "@/hooks/use-resume";
@@ -16,7 +16,8 @@ export function PreviewToolbar({
 }) {
   const { loadDemoResume, isLoadingDemo } = useDemoResume();
   const { showToast } = useToast();
-  const { resume, setOnePageFit } = useResume();
+  const { resume, setOnePageFit, setTemplate } = useResume();
+  const currentTemplate = resume.template ?? "classic";
 
   const handleDemo = () => {
     loadDemoResume().then(() => showToast("Demo Loaded", "success"));
@@ -24,26 +25,85 @@ export function PreviewToolbar({
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-1">
-      <h2 className="text-base font-semibold tracking-tight text-foreground">
-        <motion.span
-          initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          transition={{ duration: 0.5, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-          className="inline-block"
-        >
-          Resume Preview
-        </motion.span>
-      </h2>
-      {/* flex-wrap on the outer row (above) is a safety net; collapsing
-          each button to icon-only below `sm` is the real fix -- three
-          full-text buttons plus the heading need ~430px+ and don't fit
-          in a mobile preview panel with maybe 250-295px available,
-          which (since this row's parent has overflow-hidden) meant the
-          Download button -- the single most important action here --
-          could get silently clipped off-screen. Same `hidden sm:inline`
-          pattern SearchTrigger already uses; aria-label on each button
-          keeps them accessible when their text is visually hidden. */}
+      <div className="flex items-center gap-2.5">
+        <h2 className="text-base font-semibold tracking-tight text-foreground">
+          <motion.span
+            initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ duration: 0.5, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="inline-block"
+          >
+            Resume Preview
+          </motion.span>
+        </h2>
+      </div>
+
       <div className="flex flex-wrap items-center gap-2">
+        {/* Animated Sleek Template Switcher: Classic vs Modern with gliding spring pill */}
+        <div
+          role="radiogroup"
+          aria-label="Resume template style"
+          className="relative inline-flex items-center rounded-button border border-glass-border bg-popover/80 p-0.5 text-xs font-medium shadow-2xs backdrop-blur-xs"
+        >
+          <button
+            type="button"
+            role="radio"
+            aria-checked={currentTemplate === "classic"}
+            onClick={() => setTemplate("classic")}
+            title="Classic: Single-column serif layout"
+            className={cn(
+              "relative z-10 flex items-center gap-1.5 rounded-[6px] px-2.5 py-1 text-xs font-medium transition-colors duration-200",
+              currentTemplate === "classic"
+                ? "text-primary-foreground font-semibold"
+                : "text-foreground-secondary hover:text-foreground"
+            )}
+          >
+            {currentTemplate === "classic" && (
+              <motion.span
+                layoutId="active-template-pill"
+                className="absolute inset-0 rounded-[6px] bg-primary shadow-xs"
+                transition={{ type: "spring", stiffness: 480, damping: 32 }}
+              />
+            )}
+            <span className="relative z-10 flex items-center gap-1.5">
+              <FileText
+                size={12}
+                className={cn("transition-opacity", currentTemplate === "classic" ? "opacity-100" : "opacity-60")}
+              />
+              Classic
+            </span>
+          </button>
+
+          <button
+            type="button"
+            role="radio"
+            aria-checked={currentTemplate === "modern"}
+            onClick={() => setTemplate("modern")}
+            title="Modern: Two-column sans-serif layout"
+            className={cn(
+              "relative z-10 flex items-center gap-1.5 rounded-[6px] px-2.5 py-1 text-xs font-medium transition-colors duration-200",
+              currentTemplate === "modern"
+                ? "text-primary-foreground font-semibold"
+                : "text-foreground-secondary hover:text-foreground"
+            )}
+          >
+            {currentTemplate === "modern" && (
+              <motion.span
+                layoutId="active-template-pill"
+                className="absolute inset-0 rounded-[6px] bg-primary shadow-xs"
+                transition={{ type: "spring", stiffness: 480, damping: 32 }}
+              />
+            )}
+            <span className="relative z-10 flex items-center gap-1.5">
+              <Columns2
+                size={12}
+                className={cn("transition-opacity", currentTemplate === "modern" ? "opacity-100" : "opacity-60")}
+              />
+              Modern
+            </span>
+          </button>
+        </div>
+
         <button
           type="button"
           onClick={handleDemo}

@@ -1,6 +1,6 @@
 import type { Resume } from "@/types/resume";
 import { ExperienceType } from "@/types/resume";
-import { DEFAULT_SECTION_ORDER } from "@/constants/resume-defaults";
+import { DEFAULT_SECTION_ORDER, DEFAULT_SKILL_CATEGORIES } from "@/constants/resume-defaults";
 
 /**
  * Realistic student/fresh-grad resume used by "Try Demo Resume". Every
@@ -97,6 +97,7 @@ export const DEMO_RESUME: Resume = {
     { id: "demo-skill-10", label: "DSA", category: "other" },
     { id: "demo-skill-11", label: "System Design", category: "other" },
   ],
+  skillCategories: DEFAULT_SKILL_CATEGORIES,
   certifications: [
     {
       id: "demo-cert-1",
@@ -130,8 +131,11 @@ export const DEMO_RESUME: Resume = {
     enabled: true,
     title: "Extracurricular Activities",
     body: "Core member, college coding club -- organized 2 campus-wide hackathons with 200+ participants.",
+    column: "right",
   },
-  custom2: { enabled: false, title: "", body: "" },
+  custom2: { enabled: false, title: "", body: "", column: "right" },
+  custom3: { enabled: false, title: "", body: "", column: "right" },
   sectionOrder: DEFAULT_SECTION_ORDER,
   onePageFit: false,
+  template: "classic",
 };

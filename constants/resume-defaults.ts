@@ -1,7 +1,14 @@
-import type { Resume, ReorderableSectionId, SectionId, SkillCategory } from "@/types/resume";
+import type { Resume, ReorderableSectionId, SectionId, SkillCategory, SkillCategoryConfig } from "@/types/resume";
 import { ExperienceType, SECTION_IDS } from "@/types/resume";
 import type { ResumeStore, SavedResume } from "@/types/resume-store";
 import { createId } from "@/lib/id";
+
+export const DEFAULT_SKILL_CATEGORIES: SkillCategoryConfig[] = [
+  { id: "languages", label: "Languages" },
+  { id: "frameworks", label: "Frameworks / Libraries" },
+  { id: "tools", label: "Tools / Platforms" },
+  { id: "other", label: "Other / Concepts" },
+];
 
 /** SECTION_IDS minus "personal" -- see Resume.sectionOrder in
  *  types/resume.ts. Since "custom" is the last entry in SECTION_IDS,
@@ -28,6 +35,7 @@ export const EMPTY_RESUME: Resume = {
   experience: [],
   projects: [],
   skills: [],
+  skillCategories: DEFAULT_SKILL_CATEGORIES,
   certifications: [],
   certificationsEnabled: true,
   achievements: [],
@@ -45,10 +53,12 @@ export const EMPTY_RESUME: Resume = {
     showSignatureName: false,
     signatureName: "",
   },
-  custom: { enabled: false, title: "", body: "" },
-  custom2: { enabled: false, title: "", body: "" },
+  custom: { enabled: false, title: "", body: "", column: "right" },
+  custom2: { enabled: false, title: "", body: "", column: "right" },
+  custom3: { enabled: false, title: "", body: "", column: "right" },
   sectionOrder: DEFAULT_SECTION_ORDER,
   onePageFit: false,
+  template: "classic",
 };
 
 export const SECTION_META: Record<
@@ -67,6 +77,7 @@ export const SECTION_META: Record<
   declaration: { label: "Declaration", optional: true },
   custom: { label: "Custom Section", optional: true },
   custom2: { label: "Custom Section 2", optional: true },
+  custom3: { label: "Custom Section 3", optional: true },
 };
 
 /** Relative weight each section contributes to overall Resume Completion.
@@ -97,6 +108,7 @@ export const SECTION_WEIGHTS: Record<SectionId, number> = {
   declaration: 4,
   custom: 0,
   custom2: 0,
+  custom3: 0,
 };
 
 export const EXPERIENCE_TYPE_OPTIONS = Object.values(ExperienceType);
@@ -194,6 +206,10 @@ export function mergeResumeWithDefaults(loaded: unknown, fallback: Resume): Resu
     experience: arrayOrFallback("experience"),
     projects: arrayOrFallback("projects"),
     skills: arrayOrFallback("skills"),
+    skillCategories:
+      Array.isArray(l.skillCategories) && l.skillCategories.length > 0
+        ? l.skillCategories
+        : (fallback.skillCategories ?? DEFAULT_SKILL_CATEGORIES),
     certifications: arrayOrFallback("certifications"),
     certificationsEnabled:
       typeof l.certificationsEnabled === "boolean" ? l.certificationsEnabled : fallback.certificationsEnabled,
@@ -205,8 +221,10 @@ export function mergeResumeWithDefaults(loaded: unknown, fallback: Resume): Resu
     declaration: { ...fallback.declaration, ...(l.declaration ?? {}) },
     custom: { ...fallback.custom, ...(l.custom ?? {}) },
     custom2: { ...fallback.custom2, ...(l.custom2 ?? {}) },
+    custom3: { ...fallback.custom3, ...(l.custom3 ?? {}) },
     sectionOrder: normalizeSectionOrder(l.sectionOrder),
     onePageFit: typeof l.onePageFit === "boolean" ? l.onePageFit : fallback.onePageFit ?? false,
+    template: l.template === "modern" ? "modern" : (fallback.template ?? "classic"),
   };
 }
 

@@ -102,6 +102,10 @@ export function getSectionStatus(resume: Resume, section: SectionId): SectionSta
       if (!resume.custom2.enabled) return "empty";
       return isNonEmpty(resume.custom2.title) && isNonEmpty(resume.custom2.body) ? "complete" : "partial";
 
+    case "custom3":
+      if (!resume.custom3.enabled) return "empty";
+      return isNonEmpty(resume.custom3.title) && isNonEmpty(resume.custom3.body) ? "complete" : "partial";
+
     default:
       return "empty";
   }

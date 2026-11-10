@@ -36,6 +36,7 @@ const SECTION_ICONS: Record<SectionId, typeof Download> = {
   declaration: FileSignature,
   custom: LayoutList,
   custom2: LayoutList,
+  custom3: LayoutList,
 };
 
 export function CommandPalette() {

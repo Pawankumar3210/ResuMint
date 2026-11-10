@@ -13,6 +13,8 @@ import type {
   CustomSection,
   ReorderableSectionId,
   SkillCategory,
+  SkillCategoryConfig,
+  ResumeTemplate,
 } from "@/types/resume";
 import { ExperienceType } from "@/types/resume";
 import type { SavedResume, ResumeStore } from "@/types/resume-store";
@@ -62,6 +64,13 @@ export interface ResumeContextValue {
   addSkill: (label: string, category: SkillCategory) => void;
   removeSkill: (id: string) => void;
 
+  /** Skill category CRUD -- allows users to rename, reorder, add, and
+   *  delete categories beyond (or instead of) the four defaults. */
+  addSkillCategory: (label: string) => void;
+  removeSkillCategory: (id: string) => void;
+  updateSkillCategory: (id: string, label: string) => void;
+  moveSkillCategory: (id: string, direction: "up" | "down") => void;
+
   addCertification: () => void;
   updateCertification: (id: string, patch: Partial<CertificationEntry>) => void;
   removeCertification: (id: string) => void;
@@ -83,6 +92,7 @@ export interface ResumeContextValue {
 
   updateCustomSection: (patch: Partial<CustomSection>) => void;
   updateCustomSection2: (patch: Partial<CustomSection>) => void;
+  updateCustomSection3: (patch: Partial<CustomSection>) => void;
 
   /** Swaps a section with its immediate neighbor in resume.sectionOrder
    *  -- a no-op if it's already at that end, same convention as
@@ -91,6 +101,7 @@ export interface ResumeContextValue {
   moveSection: (id: ReorderableSectionId, direction: "up" | "down") => void;
 
   setOnePageFit: (enabled: boolean) => void;
+  setTemplate: (template: ResumeTemplate) => void;
 
   setResume: (resume: Resume) => void;
   clearResume: () => void;
@@ -216,7 +227,10 @@ export function ResumeProvider({ children }: { children: React.ReactNode }) {
 
   // Generic patcher for the top-level "one object" sections (personal, summary, declaration, custom).
   const patchField = useCallback(
-    <K extends "personal" | "summary" | "declaration" | "custom" | "custom2">(key: K, patch: Partial<Resume[K]>) => {
+    <K extends "personal" | "summary" | "declaration" | "custom" | "custom2" | "custom3">(
+      key: K,
+      patch: Partial<Resume[K]>
+    ) => {
       commit((prev) => ({ ...prev, [key]: { ...prev[key], ...patch } }));
     },
     [commit]
@@ -473,6 +487,48 @@ export function ResumeProvider({ children }: { children: React.ReactNode }) {
       },
       removeSkill: (id) => removeEntry("skills", id),
 
+      addSkillCategory: (label) => {
+        const trimmed = label.trim();
+        if (!trimmed) return;
+        commit((prev) => ({
+          ...prev,
+          skillCategories: [
+            ...(prev.skillCategories ?? []),
+            { id: createId(), label: trimmed } satisfies SkillCategoryConfig,
+          ],
+        }));
+      },
+      removeSkillCategory: (id) => {
+        commit((prev) => ({
+          ...prev,
+          skillCategories: (prev.skillCategories ?? []).filter((c) => c.id !== id),
+          // Also remove all skills that belonged to this category so they
+          // don't become orphaned entries with no visible home.
+          skills: prev.skills.filter((s) => s.category !== id),
+        }));
+      },
+      updateSkillCategory: (id, label) => {
+        const trimmed = label.trim();
+        if (!trimmed) return;
+        commit((prev) => ({
+          ...prev,
+          skillCategories: (prev.skillCategories ?? []).map((c) =>
+            c.id === id ? { ...c, label: trimmed } : c
+          ),
+        }));
+      },
+      moveSkillCategory: (id, direction) => {
+        commit((prev) => {
+          const cats = [...(prev.skillCategories ?? [])];
+          const idx = cats.findIndex((c) => c.id === id);
+          if (idx === -1) return prev;
+          const target = direction === "up" ? idx - 1 : idx + 1;
+          if (target < 0 || target >= cats.length) return prev;
+          [cats[idx], cats[target]] = [cats[target], cats[idx]];
+          return { ...prev, skillCategories: cats };
+        }, { discrete: true });
+      },
+
       addCertification: () =>
         addEntry("certifications", {
           id: createId(),
@@ -507,9 +563,11 @@ export function ResumeProvider({ children }: { children: React.ReactNode }) {
 
       updateCustomSection: (patch) => patchField("custom", patch),
       updateCustomSection2: (patch) => patchField("custom2", patch),
+      updateCustomSection3: (patch) => patchField("custom3", patch),
       moveSection,
 
       setOnePageFit: (enabled) => commit((prev) => ({ ...prev, onePageFit: enabled })),
+      setTemplate: (template) => commit((prev) => ({ ...prev, template })),
 
       setResume: (next) => commit(() => next, { discrete: true }),
       clearResume: () => commit(() => EMPTY_RESUME, { discrete: true }),

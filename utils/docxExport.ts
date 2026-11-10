@@ -11,35 +11,26 @@ import {
   VerticalAlign,
 } from "docx";
 import type { Resume, ReorderableSectionId } from "@/types/resume";
-import { SKILL_CATEGORIES } from "@/types/resume";
 import type { PageLayout } from "@/types/export";
-import { SKILL_CATEGORY_META } from "@/constants/resume-defaults";
 import { formatDateRange, joinNonEmpty } from "@/utils/helpers";
 
 const COLOR_BLACK = "000000";
 const COLOR_MUTED = "52525B";
 const COLOR_BODY = "3F3F46";
-const FONT = "Times New Roman";
 
 type DocxNode = Paragraph | Table;
 
 /**
  * Builds a real, editable .docx Document -- opens correctly in Word and
- * Google Docs, per spec. Mirrors ResumePaper's section order/styling
- * (Times New Roman, bold black uppercase headings with an underline rule)
- * so the download matches what the user saw in the live preview.
- *
- * SECTION ORDER: the name/contact header (from resume.personal) is
- * always emitted first, same as ResumePaper -- "personal" is never part
- * of resume.sectionOrder. Every other section is produced by
- * `sectionBuilders[id]()` and appended in resume.sectionOrder's order,
- * so the downloaded .docx always matches the live preview and the
- * builder sidebar's section ordering exactly.
+ * Google Docs, per spec. Supports both "classic" (Times New Roman, single-column)
+ * and "modern" (Calibri, two-column table) templates.
  */
 export function buildResumeDocx(resume: Resume, layout: PageLayout): Document {
-  const compact = layout === "one";
+  const isModern = resume.template === "modern";
+  const FONT = isModern ? "Calibri" : "Times New Roman";
+  const compact = layout === "one" || resume.onePageFit;
   const bodySize = compact ? 19 : 22; // half-points: 19 = 9.5pt, 22 = 11pt
-  const spacingAfter = compact ? 80 : 140;
+  const spacingAfter = compact ? (isModern ? 60 : 80) : (isModern ? 100 : 140);
 
   const {
     personal,
@@ -59,24 +50,25 @@ export function buildResumeDocx(resume: Resume, layout: PageLayout): Document {
     declaration,
     custom,
     custom2,
+    custom3,
     sectionOrder,
   } = resume;
 
   const contactLine = joinNonEmpty(
     [personal.email, personal.phone, personal.location, personal.linkedin, personal.github, personal.portfolio],
-    "  |  "
+    isModern ? "  •  " : "  |  "
   );
 
   const children: DocxNode[] = [
     new Paragraph({
       heading: HeadingLevel.TITLE,
-      alignment: "center",
+      alignment: isModern ? "left" : "center",
       spacing: { after: 40 },
       children: [
         new TextRun({
           text: (personal.fullName || "Your Name").toUpperCase(),
           bold: true,
-          size: compact ? 34 : 40,
+          size: compact ? 32 : 38,
           color: COLOR_BLACK,
         }),
       ],
@@ -86,19 +78,35 @@ export function buildResumeDocx(resume: Resume, layout: PageLayout): Document {
   if (contactLine) {
     children.push(
       new Paragraph({
-        alignment: "center",
-        spacing: { after: 200 },
-        children: [new TextRun({ text: contactLine, size: 18, color: COLOR_MUTED })],
+        alignment: isModern ? "left" : "center",
+        spacing: { after: isModern ? 120 : 200 },
+        border: isModern
+          ? { bottom: { style: BorderStyle.SINGLE, size: 6, color: "CCCCCC", space: 4 } }
+          : undefined,
+        children: [new TextRun({ text: contactLine, size: compact ? 16 : 18, color: COLOR_MUTED })],
       })
     );
   }
 
   const sectionTitle = (title: string) =>
     new Paragraph({
-      spacing: { before: spacingAfter, after: 80 },
-      border: { bottom: { style: BorderStyle.SINGLE, size: 8, color: "666666", space: 4 } },
+      spacing: { before: spacingAfter, after: isModern ? 60 : 80 },
+      border: {
+        bottom: {
+          style: BorderStyle.SINGLE,
+          size: isModern ? 6 : 8,
+          color: isModern ? "71717A" : "666666",
+          space: isModern ? 3 : 4,
+        },
+      },
       children: [
-        new TextRun({ text: title.toUpperCase(), bold: true, size: 20, color: COLOR_BLACK, characterSpacing: 32 }),
+        new TextRun({
+          text: title.toUpperCase(),
+          bold: true,
+          size: isModern ? 19 : 20,
+          color: COLOR_BLACK,
+          characterSpacing: isModern ? 16 : 32,
+        }),
       ],
     });
 
@@ -128,9 +136,42 @@ export function buildResumeDocx(resume: Resume, layout: PageLayout): Document {
       if (!educationEnabled || education.length === 0) return [];
       const nodes: DocxNode[] = [sectionTitle("Education")];
       education.forEach((e) => {
-        const title = `${e.institution || "Institution"}${e.degree ? ` — ${e.degree}${e.branch ? `, ${e.branch}` : ""}` : ""}`;
-        nodes.push(entryHeadPara(title, formatDateRange(e.startMonth, e.startYear, e.endMonth, e.endYear)));
-        if (e.grade) nodes.push(bodyPara(e.grade, { color: COLOR_MUTED }));
+        if (isModern) {
+          nodes.push(
+            new Paragraph({
+              spacing: { after: 10 },
+              children: [
+                new TextRun({
+                  text: `${e.degree || "Degree"}${e.branch ? `, ${e.branch}` : ""}`,
+                  bold: true,
+                  size: bodySize,
+                  color: COLOR_BLACK,
+                }),
+              ],
+            }),
+            new Paragraph({
+              spacing: { after: 10 },
+              children: [
+                new TextRun({ text: e.institution || "Institution", size: bodySize - 1, color: COLOR_MUTED }),
+              ],
+            }),
+            new Paragraph({
+              spacing: { after: 20 },
+              children: [
+                new TextRun({
+                  text: formatDateRange(e.startMonth, e.startYear, e.endMonth, e.endYear),
+                  size: bodySize - 2,
+                  color: COLOR_MUTED,
+                }),
+                ...(e.grade ? [new TextRun({ text: ` (${e.grade})`, size: bodySize - 2, color: COLOR_MUTED })] : []),
+              ],
+            })
+          );
+        } else {
+          const title = `${e.institution || "Institution"}${e.degree ? ` — ${e.degree}${e.branch ? `, ${e.branch}` : ""}` : ""}`;
+          nodes.push(entryHeadPara(title, formatDateRange(e.startMonth, e.startYear, e.endMonth, e.endYear)));
+          if (e.grade) nodes.push(bodyPara(e.grade, { color: COLOR_MUTED }));
+        }
       });
       return nodes;
     },
@@ -173,18 +214,35 @@ export function buildResumeDocx(resume: Resume, layout: PageLayout): Document {
     skills: () => {
       if (skills.length === 0) return [];
       const nodes: DocxNode[] = [sectionTitle("Skills")];
-      SKILL_CATEGORIES.forEach((category) => {
-        const items = skills.filter((s) => s.category === category);
+      (resume.skillCategories ?? []).forEach((cat) => {
+        const items = skills.filter((s) => s.category === cat.id);
         if (items.length === 0) return;
-        nodes.push(
-          new Paragraph({
-            spacing: { after: 40 },
-            children: [
-              new TextRun({ text: `${SKILL_CATEGORY_META[category].label}: `, bold: true, size: bodySize, color: COLOR_BLACK }),
-              new TextRun({ text: items.map((s) => s.label).join(", "), size: bodySize, color: COLOR_BODY }),
-            ],
-          })
-        );
+        if (isModern) {
+          nodes.push(
+            new Paragraph({
+              spacing: { after: 10 },
+              children: [
+                new TextRun({ text: cat.label, bold: true, size: bodySize - 1, color: COLOR_BLACK }),
+              ],
+            }),
+            new Paragraph({
+              spacing: { after: 30 },
+              children: [
+                new TextRun({ text: items.map((s) => s.label).join(", "), size: bodySize - 1, color: COLOR_BODY }),
+              ],
+            })
+          );
+        } else {
+          nodes.push(
+            new Paragraph({
+              spacing: { after: 40 },
+              children: [
+                new TextRun({ text: `${cat.label}: `, bold: true, size: bodySize, color: COLOR_BLACK }),
+                new TextRun({ text: items.map((s) => s.label).join(", "), size: bodySize, color: COLOR_BODY }),
+              ],
+            })
+          );
+        }
       });
       return nodes;
     },
@@ -193,8 +251,29 @@ export function buildResumeDocx(resume: Resume, layout: PageLayout): Document {
       if (!certificationsEnabled || certifications.length === 0) return [];
       const nodes: DocxNode[] = [sectionTitle("Certifications")];
       certifications.forEach((c) => {
-        const title = `${c.name || "Certification"}${c.organization ? ` — ${c.organization}` : ""}`;
-        nodes.push(entryHeadPara(title, joinNonEmpty([c.month, c.year])));
+        if (isModern) {
+          nodes.push(
+            new Paragraph({
+              spacing: { after: 10 },
+              children: [
+                new TextRun({ text: c.name || "Certification", bold: true, size: bodySize - 1, color: COLOR_BLACK }),
+              ],
+            }),
+            new Paragraph({
+              spacing: { after: 20 },
+              children: [
+                new TextRun({
+                  text: `${c.organization || ""}${c.month || c.year ? ` (${joinNonEmpty([c.month, c.year])})` : ""}`,
+                  size: bodySize - 2,
+                  color: COLOR_MUTED,
+                }),
+              ],
+            })
+          );
+        } else {
+          const title = `${c.name || "Certification"}${c.organization ? ` — ${c.organization}` : ""}`;
+          nodes.push(entryHeadPara(title, joinNonEmpty([c.month, c.year])));
+        }
       });
       return nodes;
     },
@@ -348,15 +427,75 @@ export function buildResumeDocx(resume: Resume, layout: PageLayout): Document {
 
     custom2: () => {
       if (!custom2.enabled || !(custom2.title.trim() || custom2.body.trim())) return [];
-      const nodes: DocxNode[] = [sectionTitle(custom2.title || "Custom Section")];
+      const nodes: DocxNode[] = [sectionTitle(custom2.title || "Custom Section 2")];
       if (custom2.body) nodes.push(bodyPara(custom2.body, { color: COLOR_BODY }));
+      return nodes;
+    },
+
+    custom3: () => {
+      if (!custom3.enabled || !(custom3.title.trim() || custom3.body.trim())) return [];
+      const nodes: DocxNode[] = [sectionTitle(custom3.title || "Custom Section 3")];
+      if (custom3.body) nodes.push(bodyPara(custom3.body, { color: COLOR_BODY }));
       return nodes;
     },
   };
 
-  sectionOrder.forEach((id) => {
-    children.push(...sectionBuilders[id]());
-  });
+  const SIDEBAR_SECTIONS = new Set<ReorderableSectionId>([
+    "education",
+    "skills",
+    "certifications",
+    "languages",
+  ]);
+  if (custom.column === "left") SIDEBAR_SECTIONS.add("custom");
+  if (custom2.column === "left") SIDEBAR_SECTIONS.add("custom2");
+  if (custom3.column === "left") SIDEBAR_SECTIONS.add("custom3");
+  const sidebarOrder = sectionOrder.filter((id) => SIDEBAR_SECTIONS.has(id));
+  const mainOrder = sectionOrder.filter((id) => !SIDEBAR_SECTIONS.has(id));
+
+  if (isModern) {
+    const sidebarNodes: DocxNode[] = [];
+    sidebarOrder.forEach((id) => {
+      sidebarNodes.push(...sectionBuilders[id]());
+    });
+
+    const mainNodes: DocxNode[] = [];
+    mainOrder.forEach((id) => {
+      mainNodes.push(...sectionBuilders[id]());
+    });
+
+    const twoColTable = new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      borders: {
+        top: { style: BorderStyle.NONE },
+        bottom: { style: BorderStyle.NONE },
+        left: { style: BorderStyle.NONE },
+        right: { style: BorderStyle.NONE },
+        insideHorizontal: { style: BorderStyle.NONE },
+        insideVertical: { style: BorderStyle.NONE },
+      },
+      rows: [
+        new TableRow({
+          children: [
+            new TableCell({
+              width: { size: 35, type: WidthType.PERCENTAGE },
+              children: (sidebarNodes.length > 0 ? sidebarNodes : [new Paragraph({})]) as Paragraph[],
+              margins: { right: 160 },
+            }),
+            new TableCell({
+              width: { size: 65, type: WidthType.PERCENTAGE },
+              children: (mainNodes.length > 0 ? mainNodes : [new Paragraph({})]) as Paragraph[],
+              margins: { left: 160 },
+            }),
+          ],
+        }),
+      ],
+    });
+    children.push(twoColTable);
+  } else {
+    sectionOrder.forEach((id) => {
+      children.push(...sectionBuilders[id]());
+    });
+  }
 
   return new Document({
     title: `${personal.fullName || "Resume"} — Resume`,

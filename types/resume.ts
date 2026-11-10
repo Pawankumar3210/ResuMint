@@ -63,8 +63,13 @@ export interface ProjectEntry {
   liveUrl: string; // optional
 }
 
+export interface SkillCategoryConfig {
+  id: string;
+  label: string;
+}
+
 export const SKILL_CATEGORIES = ["languages", "frameworks", "tools", "other"] as const;
-export type SkillCategory = (typeof SKILL_CATEGORIES)[number];
+export type SkillCategory = (typeof SKILL_CATEGORIES)[number] | string;
 
 export interface SkillItem {
   id: string;
@@ -102,10 +107,12 @@ export interface Declaration {
   signatureName: string;
 }
 
+export type CustomSectionColumn = "left" | "right";
+
 /** A user-defined, free-text section (title + body), toggleable on/off
- *  the same way Declaration/Achievements are. Two independent slots are
- *  supported (see Resume.custom / Resume.custom2 below) rather than a
- *  dynamic list -- covers "I want one or two more sections the builder
+ *  the same way Declaration/Achievements are. Three independent slots are
+ *  supported (see Resume.custom / Resume.custom2 / Resume.custom3 below)
+ *  rather than a dynamic list -- covers "I want extra sections the builder
  *  doesn't have a dedicated form for" without introducing
  *  dynamically-keyed sections into a codebase where every other section
  *  is a fixed, statically-typed SectionId. */
@@ -113,7 +120,11 @@ export interface CustomSection {
   enabled: boolean;
   title: string;
   body: string;
+  /** In the Modern two-column layout only: placement in left sidebar vs right main column. Defaults to "right". */
+  column?: CustomSectionColumn;
 }
+
+export type ResumeTemplate = "classic" | "modern";
 
 export interface Resume {
   personal: PersonalDetails;
@@ -124,6 +135,7 @@ export interface Resume {
   experience: ExperienceEntry[];
   projects: ProjectEntry[];
   skills: SkillItem[];
+  skillCategories: SkillCategoryConfig[];
   certifications: CertificationEntry[];
   /** Lets the whole Certifications section be hidden even if entries
    *  exist, the same way Declaration.enabled/achievementsEnabled work --
@@ -143,6 +155,7 @@ export interface Resume {
   declaration: Declaration;
   custom: CustomSection;
   custom2: CustomSection;
+  custom3: CustomSection;
   /** The order sections other than "personal" render in, across the
    *  builder sidebar, live preview, PDF export, and DOCX export --
    *  reorderable by the person via up/down controls. "personal" is
@@ -156,6 +169,8 @@ export interface Resume {
   /** When enabled, applies compact spacing, margins, and typography
    *  calibrated to fit content onto a single physical page. */
   onePageFit: boolean;
+  /** Visual template style: "classic" (single-column serif) or "modern" (two-column sans-serif). */
+  template: ResumeTemplate;
 }
 
 export const SECTION_IDS = [
@@ -171,6 +186,7 @@ export const SECTION_IDS = [
   "declaration",
   "custom",
   "custom2",
+  "custom3",
 ] as const;
 
 export type SectionId = (typeof SECTION_IDS)[number];
