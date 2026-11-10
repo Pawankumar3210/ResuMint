@@ -29,7 +29,7 @@ const STEP_DELAY_MS = 120;
 export { demoLoadState };
 
 export function useDemoResume() {
-  const { setResume } = useResume();
+  const { resume, setResume } = useResume();
   const [isLoadingDemo, setIsLoadingDemo] = useState(false);
   const cancelRef = useRef(false);
 
@@ -39,7 +39,12 @@ export function useDemoResume() {
     demoLoadState.active = true;
 
     try {
-      let building: Resume = { ...EMPTY_RESUME };
+      // Preserve the user's active template selection and one-page fit mode
+      let building: Resume = {
+        ...EMPTY_RESUME,
+        template: resume.template,
+        onePageFit: resume.onePageFit,
+      };
       setResume(building);
 
       for (const key of FILL_ORDER) {
@@ -58,7 +63,7 @@ export function useDemoResume() {
       demoLoadState.active = false;
       setIsLoadingDemo(false);
     }
-  }, [setResume]);
+  }, [resume.template, resume.onePageFit, setResume]);
 
   return { loadDemoResume, isLoadingDemo };
 }

@@ -570,7 +570,12 @@ export function ResumeProvider({ children }: { children: React.ReactNode }) {
       setTemplate: (template) => commit((prev) => ({ ...prev, template })),
 
       setResume: (next) => commit(() => next, { discrete: true }),
-      clearResume: () => commit(() => EMPTY_RESUME, { discrete: true }),
+      clearResume: () =>
+        commit((prev) => ({
+          ...EMPTY_RESUME,
+          template: prev.template,
+          onePageFit: prev.onePageFit,
+        }), { discrete: true }),
       undo,
       redo,
     }),

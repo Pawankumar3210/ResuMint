@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   Search, Download, Trash2, Sparkles, SunMoon, Upload, Undo2, Redo2,
   User, FileText, GraduationCap, Briefcase, FolderGit2, Wrench,
-  BadgeCheck, Trophy, Languages, FileSignature, LayoutList,
+  BadgeCheck, Trophy, Languages, FileSignature, LayoutList, Columns2, AlignJustify,
 } from "lucide-react";
 import { useCommandPalette } from "@/hooks/use-command-palette";
 import { useAppActions } from "@/hooks/use-app-actions";
@@ -43,7 +43,7 @@ export function CommandPalette() {
   const { open, setOpen } = useCommandPalette();
   const getActions = useAppActions();
   const { cycleTheme } = useTheme();
-  const { undo, redo } = useResume();
+  const { resume, setTemplate, setOnePageFit, undo, redo } = useResume();
 
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
@@ -64,6 +64,34 @@ export function CommandPalette() {
         icon: Upload,
         group: "Actions",
         run: () => getActions().openImportDialog?.(),
+      },
+      {
+        id: "switch-template-toggle",
+        label: `Switch Template to ${resume.template === "modern" ? "Classic" : "Modern"}`,
+        icon: Columns2,
+        group: "Actions",
+        run: () => setTemplate(resume.template === "modern" ? "classic" : "modern"),
+      },
+      {
+        id: "switch-modern",
+        label: "Switch to Modern Template (Two-Column)",
+        icon: Columns2,
+        group: "Actions",
+        run: () => setTemplate("modern"),
+      },
+      {
+        id: "switch-classic",
+        label: "Switch to Classic Template (Single-Column)",
+        icon: FileText,
+        group: "Actions",
+        run: () => setTemplate("classic"),
+      },
+      {
+        id: "toggle-one-page-fit",
+        label: resume.onePageFit ? "Disable 1-Page Fit" : "Snap to 1 Page (1-Page Fit)",
+        icon: AlignJustify,
+        group: "Actions",
+        run: () => setOnePageFit(!resume.onePageFit),
       },
       {
         id: "demo",
@@ -108,7 +136,7 @@ export function CommandPalette() {
         run: () => getActions().jumpToSection?.(id),
       })),
     ],
-    [getActions, cycleTheme, undo, redo]
+    [getActions, cycleTheme, resume.template, resume.onePageFit, setTemplate, setOnePageFit, undo, redo]
   );
 
   const filtered = useMemo(
