@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { PanelLeft, PanelRight } from "lucide-react";
 import { useResume } from "@/hooks/use-resume";
 import type { CustomSection } from "@/types/resume";
@@ -70,7 +71,7 @@ function CustomSectionFormBase({
             <div
               role="radiogroup"
               aria-label="Modern layout column"
-              className="grid grid-cols-2 gap-1.5 rounded-button border border-glass-border bg-muted/30 p-1"
+              className="relative flex rounded-full border border-glass-border bg-muted/40 p-0.5 text-xs font-medium shadow-2xs"
             >
               <button
                 type="button"
@@ -78,14 +79,23 @@ function CustomSectionFormBase({
                 aria-checked={column === "left"}
                 onClick={() => onUpdate({ column: "left" })}
                 className={cn(
-                  "flex items-center justify-center gap-1.5 rounded-[6px] py-1.5 px-3 text-xs font-medium transition-all duration-150",
+                  "relative z-10 flex flex-1 items-center justify-center gap-1.5 rounded-full py-1.5 px-3 text-xs font-medium transition-colors duration-200",
                   column === "left"
-                    ? "bg-primary text-primary-foreground font-semibold shadow-xs"
-                    : "text-foreground-secondary hover:text-foreground hover:bg-muted/50"
+                    ? "text-primary-foreground font-semibold"
+                    : "text-foreground-secondary hover:text-foreground"
                 )}
               >
-                <PanelLeft size={13} />
-                Left Section (Sidebar)
+                {column === "left" && (
+                  <motion.span
+                    layoutId={`custom-col-pill-${checkboxLabel}`}
+                    className="absolute inset-0 rounded-full bg-primary shadow-xs"
+                    transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center gap-1.5">
+                  <PanelLeft size={13} />
+                  Left Section (Sidebar)
+                </span>
               </button>
               <button
                 type="button"
@@ -93,14 +103,23 @@ function CustomSectionFormBase({
                 aria-checked={column !== "left"}
                 onClick={() => onUpdate({ column: "right" })}
                 className={cn(
-                  "flex items-center justify-center gap-1.5 rounded-[6px] py-1.5 px-3 text-xs font-medium transition-all duration-150",
+                  "relative z-10 flex flex-1 items-center justify-center gap-1.5 rounded-full py-1.5 px-3 text-xs font-medium transition-colors duration-200",
                   column !== "left"
-                    ? "bg-primary text-primary-foreground font-semibold shadow-xs"
-                    : "text-foreground-secondary hover:text-foreground hover:bg-muted/50"
+                    ? "text-primary-foreground font-semibold"
+                    : "text-foreground-secondary hover:text-foreground"
                 )}
               >
-                <PanelRight size={13} />
-                Right Section (Main)
+                {column !== "left" && (
+                  <motion.span
+                    layoutId={`custom-col-pill-${checkboxLabel}`}
+                    className="absolute inset-0 rounded-full bg-primary shadow-xs"
+                    transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                  />
+                )}
+                <span className="relative z-10 flex items-center gap-1.5">
+                  <PanelRight size={13} />
+                  Right Section (Main)
+                </span>
               </button>
             </div>
             <p className="text-[11px] text-foreground-secondary/80">

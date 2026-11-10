@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { motion } from "framer-motion";
-import { Minus, Plus, Maximize2 } from "lucide-react";
+import { Minus, Plus, Maximize2, Minimize2 } from "lucide-react";
 import { useResume } from "@/hooks/use-resume";
 import { useDemoResume } from "@/hooks/use-demo-resume";
 import { useToast } from "@/hooks/use-toast";
@@ -13,9 +13,9 @@ import { DownloadDialog } from "@/components/dialogs/download-dialog";
 import { SuccessDialog } from "@/components/dialogs/success-dialog";
 import { ConfirmDialog } from "@/components/dialogs/confirm-dialog";
 
-const MIN_ZOOM = 0.5;
+const MIN_ZOOM = 0.2;
 const MAX_ZOOM = 2.5;
-const ZOOM_STEP = 0.25;
+const ZOOM_STEP = 0.15;
 
 /**
  * No debounce, no loading state -- resume comes straight from context and
@@ -44,15 +44,22 @@ export function ResumePreview() {
 
   const availableWidthRef = useRef<HTMLDivElement>(null);
   const paperWrapperRef = useRef<HTMLDivElement>(null);
-  const { scale: fitScale, naturalHeight } = useShrinkToFit(availableWidthRef, paperWrapperRef, RESUME_PAPER_WIDTH_PX);
+  const { scale: fitScale, naturalHeight, availableHeight } = useShrinkToFit(
+    availableWidthRef,
+    paperWrapperRef,
+    RESUME_PAPER_WIDTH_PX
+  );
+
+  // Calculates the zoom scale factor needed to fit the ENTIRE resume height & width
+  // inside the mobile viewport without scrolling.
+  const fitPageZoom =
+    availableHeight > 0 && naturalHeight > 0 && fitScale > 0
+      ? Math.min(1, Math.max(MIN_ZOOM, (availableHeight - 32) / (naturalHeight * fitScale)))
+      : 1;
 
   // Mobile-only manual zoom, layered on top of the automatic fit-to-width
-  // scale -- 1 means "exactly fit to width" (the previous, only behavior).
-  // Resets to 1 whenever the resume's natural size changes (e.g. content
-  // added/removed), so zoom doesn't compound weirdly across edits. Done
-  // during render (not in an effect) per React's recommended pattern for
-  // "reset state when a value changes" -- avoids the extra
-  // render-then-effect-then-render cascade a useEffect version would need.
+  // scale -- 1 means "fit to width".
+  // Resets to 1 whenever the resume's natural size changes.
   const [zoomLevel, setZoomLevel] = useState(1);
   const [prevNaturalHeight, setPrevNaturalHeight] = useState(naturalHeight);
   if (naturalHeight !== prevNaturalHeight) {
@@ -60,13 +67,67 @@ export function ResumePreview() {
     setZoomLevel(1);
   }
 
+  const zoomLevelRef = useRef(zoomLevel);
+  useEffect(() => {
+    zoomLevelRef.current = zoomLevel;
+  }, [zoomLevel]);
+
+  // Touch pinch-to-zoom: scopes pinch gestures to ONLY zoom the resume canvas,
+  // preventing the browser from zooming the entire page chrome.
+  useEffect(() => {
+    const container = availableWidthRef.current;
+    if (!container) return;
+
+    let initialDistance = 0;
+    let initialZoom = 1;
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        initialDistance = Math.hypot(dx, dy);
+        initialZoom = zoomLevelRef.current;
+      }
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 2 && initialDistance > 0) {
+        e.preventDefault(); // Prevents zooming the whole browser webpage
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const dist = Math.hypot(dx, dy);
+        const ratio = dist / initialDistance;
+        const next = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, +(initialZoom * ratio).toFixed(2)));
+        setZoomLevel(next);
+      }
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      if (e.touches.length < 2) {
+        initialDistance = 0;
+      }
+    };
+
+    container.addEventListener("touchstart", onTouchStart, { passive: true });
+    container.addEventListener("touchmove", onTouchMove, { passive: false });
+    container.addEventListener("touchend", onTouchEnd, { passive: true });
+
+    return () => {
+      container.removeEventListener("touchstart", onTouchStart);
+      container.removeEventListener("touchmove", onTouchMove);
+      container.removeEventListener("touchend", onTouchEnd);
+    };
+  }, []);
+
   const effectiveScale = fitScale * zoomLevel;
   const scaledWidth = RESUME_PAPER_WIDTH_PX * effectiveScale;
   const scaledHeight = naturalHeight * effectiveScale;
-  const isZoomedIn = zoomLevel > 1.001;
+
+  const isFitPage = Math.abs(zoomLevel - fitPageZoom) < 0.04;
+  const isFitWidth = Math.abs(zoomLevel - 1) < 0.04;
 
   return (
-    <div className="relative flex h-full min-h-0 flex-col gap-4 overflow-hidden p-6">
+    <div className="relative flex h-full min-h-0 flex-col gap-4 overflow-hidden p-3 sm:p-6">
       <PreviewToolbar
         onDownloadClick={() => setDownloadOpen(true)}
         onClearClick={() => setClearConfirmOpen(true)}
@@ -75,35 +136,15 @@ export function ResumePreview() {
       {/* Two nested wrappers implement "shrink to fit" -- the resume
           paper itself always renders at its fixed natural width
           (RESUME_PAPER_WIDTH_PX) so its own text wrapping and page-break
-          math never change with panel size (see resume-paper.tsx); this
-          wrapper instead scales the whole thing down visually with CSS
-          `transform` when the panel is narrower than that.
-          - resume-scale-outer: sized to the *scaled* footprint (so it
-            reserves the right amount of space in normal document flow
-            and centers correctly -- transform alone doesn't shrink the
-            layout box it's applied to, only its painted appearance).
-          - resume-scale-wrapper: fixed at the natural width, scaled
-            down from its top-left corner to fit inside the outer box.
-          Both classes are reset to their natural (untransformed) state
-          under @media print in globals.css -- a CSS `transform` on an
-          ancestor creates a new containing block for the print
-          stylesheet's `.resume-paper { position: fixed }` rule, which
-          would otherwise silently break "fill the physical page" when
-          this component happens to be mid-shrink.
-
-          `effectiveScale` = the automatic fit-to-width scale x an
-          optional manual zoom multiplier (mobile only, see the floating
-          control below) -- zooming in past "fit width" is what that
-          control drives, and this container scrolls in both directions
-          so a zoomed-in resume can be panned around instead of forcing
-          the WHOLE PAGE to pinch-zoom (which used to be the only way to
-          read small text on a phone, and dragged the navbar/sidebar
-          along with it -- scoping zoom to just this scrollable area
-          keeps everything else at a normal, tap-sized scale). */}
+          math never change with panel size; this wrapper scales the
+          whole thing down visually with CSS `transform` when the panel is
+          narrower than that.
+          Scoping zoom to just this scrollable area keeps everything else
+          (navbar, toolbar, tabs) at a normal, tap-friendly scale. */}
       <div
         ref={availableWidthRef}
         className="min-h-0 flex-1 overflow-auto overscroll-contain"
-        style={{ touchAction: "pan-x pan-y pinch-zoom" }}
+        style={{ touchAction: "pan-x pan-y" }}
       >
         <div
           className="resume-scale-outer mx-auto"
@@ -126,39 +167,53 @@ export function ResumePreview() {
         </div>
       </div>
 
-      {/* Mobile-only zoom control -- `absolute` against THIS panel (not
-          `sticky` inside the scrolling area above), so it stays put on
-          screen regardless of which direction the resume underneath is
-          scrolled. Hidden on desktop (lg+): fit-to-width already shows
-          the resume at a comfortably readable size there, so manual
-          zoom has no real use case -- this is specifically for phones,
-          where shrinking an A4 page down to a ~340px screen makes body
-          text quite small. */}
+      {/* Mobile-only floating zoom control -- allows zooming in/out and snapping
+          between "Fit Entire Page" (to see the whole resume at once) and "Fit Width". */}
       <div className="pointer-events-none absolute inset-x-0 bottom-4 z-20 flex justify-center lg:hidden">
-        <div className="glass-surface pointer-events-auto flex items-center gap-1 rounded-chip border border-glass-border p-1 shadow-lg">
+        <div className="glass-surface pointer-events-auto flex items-center gap-1 rounded-full border border-glass-border p-1 shadow-lg backdrop-blur-md">
           <button
             type="button"
             onClick={() => setZoomLevel((z) => Math.max(MIN_ZOOM, +(z - ZOOM_STEP).toFixed(2)))}
             disabled={zoomLevel <= MIN_ZOOM}
-            aria-label="Zoom out"
+            aria-label="Zoom out resume"
+            title="Zoom out"
             className="flex h-8 w-8 items-center justify-center rounded-full text-foreground-secondary transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-30"
           >
             <Minus size={15} />
           </button>
           <button
             type="button"
-            onClick={() => setZoomLevel(1)}
-            aria-label="Reset zoom to fit width"
-            title="Fit to width"
-            className="flex h-8 min-w-[3.25rem] items-center justify-center gap-1 rounded-full px-2 text-xs font-medium text-foreground-secondary transition-colors hover:bg-muted hover:text-foreground"
+            onClick={() => {
+              if (isFitPage) {
+                setZoomLevel(1);
+              } else {
+                setZoomLevel(+fitPageZoom.toFixed(2));
+              }
+            }}
+            aria-label={isFitPage ? "Fit resume to width" : "Fit entire resume on screen"}
+            title={isFitPage ? "Fit to Width" : "Fit Entire Resume on Screen"}
+            className="flex h-8 min-w-[5rem] items-center justify-center gap-1 rounded-full px-2.5 text-xs font-medium text-foreground transition-colors hover:bg-muted"
           >
-            {isZoomedIn ? `${Math.round(zoomLevel * 100)}%` : <Maximize2 size={13} />}
+            {isFitPage ? (
+              <span className="flex items-center gap-1 text-[11px] font-semibold text-primary">
+                <Minimize2 size={12} /> Fit Page
+              </span>
+            ) : isFitWidth ? (
+              <span className="flex items-center gap-1 text-[11px] text-foreground-secondary hover:text-foreground">
+                <Maximize2 size={12} /> Fit Width
+              </span>
+            ) : (
+              <span className="text-[11px] font-medium tabular-nums text-primary">
+                {Math.round(zoomLevel * 100)}%
+              </span>
+            )}
           </button>
           <button
             type="button"
             onClick={() => setZoomLevel((z) => Math.min(MAX_ZOOM, +(z + ZOOM_STEP).toFixed(2)))}
             disabled={zoomLevel >= MAX_ZOOM}
-            aria-label="Zoom in"
+            aria-label="Zoom in resume"
+            title="Zoom in"
             className="flex h-8 w-8 items-center justify-center rounded-full text-foreground-secondary transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-30"
           >
             <Plus size={15} />
@@ -197,30 +252,19 @@ export function ResumePreview() {
 }
 
 /**
- * Measures `containerRef`'s available width and `contentRef`'s natural
+ * Measures `containerRef`'s available width & height and `contentRef`'s natural
  * (unscaled) size, and returns the CSS `transform: scale()` factor that
- * shrinks `contentRef` down to fit within that width, plus its natural
- * (unscaled) height so callers can compute a scaled footprint themselves
- * (needed here since the mobile zoom control layers an extra multiplier
- * on top of this hook's own fit-to-width scale).
- *
- * The key property this relies on: CSS `transform` is paint-only and
- * never affects layout-box metrics (`clientWidth`, `scrollHeight`,
- * `getBoundingClientRect` size under a transform notwithstanding --
- * we deliberately never call that here). So `contentRef.current
- * .scrollHeight`, read directly, always reflects `contentRef`'s natural,
- * untransformed height, even after we've applied a `scale()` transform
- * to that same element -- which is exactly what lets this be a stable,
- * non-circular measurement (scaling the content doesn't change the
- * number this hook reads back on the next resize).
+ * shrinks `contentRef` down to fit within that width, plus dimensions so callers
+ * can compute scaled footprints or "fit whole page" scaling factors.
  */
 function useShrinkToFit(
   containerRef: RefObject<HTMLElement | null>,
   contentRef: RefObject<HTMLElement | null>,
   naturalWidth: number
-): { scale: number; naturalHeight: number } {
+): { scale: number; naturalHeight: number; availableHeight: number } {
   const [scale, setScale] = useState(1);
   const [naturalHeight, setNaturalHeight] = useState(0);
+  const [availableHeight, setAvailableHeight] = useState(0);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -229,8 +273,10 @@ function useShrinkToFit(
 
     const compute = () => {
       const availableWidth = container.clientWidth;
+      const height = container.clientHeight;
       const nextScale = availableWidth > 0 ? Math.min(1, availableWidth / naturalWidth) : 1;
       setScale(nextScale);
+      setAvailableHeight(height);
       setNaturalHeight(content.scrollHeight);
     };
 
@@ -241,5 +287,5 @@ function useShrinkToFit(
     return () => observer.disconnect();
   }, [containerRef, contentRef, naturalWidth]);
 
-  return { scale, naturalHeight };
+  return { scale, naturalHeight, availableHeight };
 }

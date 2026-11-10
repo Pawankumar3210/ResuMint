@@ -43,7 +43,7 @@ export function PreviewToolbar({
         <div
           role="radiogroup"
           aria-label="Resume template style"
-          className="relative inline-flex items-center rounded-button border border-glass-border bg-popover/80 p-0.5 text-xs font-medium shadow-2xs backdrop-blur-xs"
+          className="relative inline-flex items-center rounded-full border border-glass-border bg-popover/80 p-0.5 text-xs font-medium shadow-2xs backdrop-blur-xs"
         >
           <button
             type="button"
@@ -52,7 +52,7 @@ export function PreviewToolbar({
             onClick={() => setTemplate("classic")}
             title="Classic: Single-column serif layout"
             className={cn(
-              "relative z-10 flex items-center gap-1.5 rounded-[6px] px-2.5 py-1 text-xs font-medium transition-colors duration-200",
+              "relative z-10 flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors duration-200",
               currentTemplate === "classic"
                 ? "text-primary-foreground font-semibold"
                 : "text-foreground-secondary hover:text-foreground"
@@ -61,8 +61,8 @@ export function PreviewToolbar({
             {currentTemplate === "classic" && (
               <motion.span
                 layoutId="active-template-pill"
-                className="absolute inset-0 rounded-[6px] bg-primary shadow-xs"
-                transition={{ type: "spring", stiffness: 480, damping: 32 }}
+                className="absolute inset-0 rounded-full bg-primary shadow-xs"
+                transition={{ type: "spring", stiffness: 500, damping: 35 }}
               />
             )}
             <span className="relative z-10 flex items-center gap-1.5">
@@ -81,7 +81,7 @@ export function PreviewToolbar({
             onClick={() => setTemplate("modern")}
             title="Modern: Two-column sans-serif layout"
             className={cn(
-              "relative z-10 flex items-center gap-1.5 rounded-[6px] px-2.5 py-1 text-xs font-medium transition-colors duration-200",
+              "relative z-10 flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors duration-200",
               currentTemplate === "modern"
                 ? "text-primary-foreground font-semibold"
                 : "text-foreground-secondary hover:text-foreground"
@@ -90,8 +90,8 @@ export function PreviewToolbar({
             {currentTemplate === "modern" && (
               <motion.span
                 layoutId="active-template-pill"
-                className="absolute inset-0 rounded-[6px] bg-primary shadow-xs"
-                transition={{ type: "spring", stiffness: 480, damping: 32 }}
+                className="absolute inset-0 rounded-full bg-primary shadow-xs"
+                transition={{ type: "spring", stiffness: 500, damping: 35 }}
               />
             )}
             <span className="relative z-10 flex items-center gap-1.5">
