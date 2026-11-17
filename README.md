@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="public/logo.svg" alt="ResuMint logo" width="72" />
+<img src="public/logo-mark.png" alt="ResuMint logo" width="72" />
 
 # ResuMint
 
