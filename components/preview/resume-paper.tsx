@@ -1,6 +1,7 @@
 "use client";
 
 import type { Resume, ReorderableSectionId } from "@/types/resume";
+import { CLASSIC_FONTS, MODERN_FONTS } from "@/constants/resume-defaults";
 import { formatDateRange, joinNonEmpty } from "@/utils/helpers";
 
 /**
@@ -76,60 +77,67 @@ export function ResumePaper({ resume }: { resume: Resume }) {
     custom2,
     custom3,
     sectionOrder,
-    onePageFit,
   } = resume;
 
-  // Compact spacing values for 1-page fit mode -- mirrors the PDF
-  // renderer's "compact" style set so the preview is an accurate proxy.
-  const fit = onePageFit;
   const isModern = resume.template === "modern";
+  const density = resume.density ?? "standard";
+  const isCompact = density === "compact";
+  const isRelaxed = density === "relaxed";
 
-  // Compact spacing values for 1-page fit mode -- mirrors the PDF
-  // renderer's "compact" style set so the preview is an accurate proxy.
+  const activeFontFamily = isModern
+    ? MODERN_FONTS.find((f) => f.id === (resume.modernFont ?? "inter"))?.fontFamily ?? '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+    : CLASSIC_FONTS.find((f) => f.id === (resume.classicFont ?? "garamond"))?.fontFamily ?? '"EB Garamond", Garamond, "Cormorant Garamond", Georgia, serif';
+
   const articleClass = isModern
-    ? fit
-      ? "resume-paper relative flex aspect-[210/297] w-full shrink-0 flex-col gap-[12px] px-[32px] py-[28px] font-sans text-[10px] leading-[1.45] text-zinc-800"
-      : "resume-paper relative flex aspect-[210/297] w-full shrink-0 flex-col gap-[16px] px-[36px] py-[38px] font-sans text-[11px] leading-[1.55] text-zinc-800"
-    : fit
-      ? "resume-paper relative flex aspect-[210/297] w-full shrink-0 flex-col gap-[14px] px-[36px] py-[36px] font-resume text-[10.5px] leading-[1.5] text-zinc-800"
-      : "resume-paper relative flex aspect-[210/297] w-full shrink-0 flex-col gap-[24px] px-[40px] py-[48px] font-resume text-[12px] leading-[1.6] text-zinc-800";
+    ? isCompact
+      ? "resume-paper relative flex aspect-[210/297] w-full shrink-0 flex-col gap-[12px] px-[32px] py-[28px] text-[10px] leading-[1.45] text-zinc-800"
+      : isRelaxed
+      ? "resume-paper relative flex aspect-[210/297] w-full shrink-0 flex-col gap-[20px] px-[40px] py-[44px] text-[11.5px] leading-[1.65] text-zinc-800"
+      : "resume-paper relative flex aspect-[210/297] w-full shrink-0 flex-col gap-[16px] px-[36px] py-[38px] text-[11px] leading-[1.55] text-zinc-800"
+    : isCompact
+      ? "resume-paper relative flex aspect-[210/297] w-full shrink-0 flex-col gap-[14px] px-[36px] py-[36px] text-[10.5px] leading-[1.5] text-zinc-800"
+      : isRelaxed
+      ? "resume-paper relative flex aspect-[210/297] w-full shrink-0 flex-col gap-[30px] px-[44px] py-[56px] text-[12.5px] leading-[1.7] text-zinc-800"
+      : "resume-paper relative flex aspect-[210/297] w-full shrink-0 flex-col gap-[24px] px-[40px] py-[48px] text-[12px] leading-[1.6] text-zinc-800";
 
   const sectionGap = isModern
-    ? fit ? "gap-[5px]" : "gap-[6px]"
-    : fit ? "gap-[6px]" : "gap-[8px]";
+    ? isCompact ? "gap-[5px]" : isRelaxed ? "gap-[8px]" : "gap-[6px]"
+    : isCompact ? "gap-[6px]" : isRelaxed ? "gap-[11px]" : "gap-[8px]";
   const entryGap = isModern
-    ? fit ? "gap-[8px]" : "gap-[10px]"
-    : fit ? "gap-[10px]" : "gap-[12px]";
-  const entryInnerGap = fit ? "gap-[1px]" : "gap-[2px]";
+    ? isCompact ? "gap-[8px]" : isRelaxed ? "gap-[13px]" : "gap-[10px]"
+    : isCompact ? "gap-[10px]" : isRelaxed ? "gap-[15px]" : "gap-[12px]";
+  const entryInnerGap = isCompact ? "gap-[1px]" : isRelaxed ? "gap-[3px]" : "gap-[2px]";
   const bodyEntryGap = isModern
-    ? fit ? "gap-[10px]" : "gap-[13px]"
-    : fit ? "gap-[12px]" : "gap-[16px]";
-  const skillGap = isModern
-    ? fit ? "gap-[3px]" : "gap-[4px]"
-    : fit ? "gap-[3px]" : "gap-[4px]";
+    ? isCompact ? "gap-[10px]" : isRelaxed ? "gap-[16px]" : "gap-[13px]"
+    : isCompact ? "gap-[12px]" : isRelaxed ? "gap-[20px]" : "gap-[16px]";
+  const skillGap = isCompact ? "gap-[3px]" : isRelaxed ? "gap-[5px]" : "gap-[4px]";
   const certGap = isModern
-    ? fit ? "gap-[3px]" : "gap-[4px]"
-    : fit ? "gap-[4px]" : "gap-[6px]";
-  const headerGap = fit ? "gap-[4px]" : "gap-[6px]";
-  const nameFontClass = fit ? "text-[17px]" : "text-[20px]";
-  const contactFontClass = fit ? "text-[8px]" : "text-[9px]";
+    ? isCompact ? "gap-[3px]" : isRelaxed ? "gap-[5px]" : "gap-[4px]"
+    : isCompact ? "gap-[4px]" : isRelaxed ? "gap-[8px]" : "gap-[6px]";
+  const headerGap = isCompact ? "gap-[4px]" : isRelaxed ? "gap-[8px]" : "gap-[6px]";
+  const nameFontClass = isCompact ? "text-[17px]" : isRelaxed ? "text-[22px]" : "text-[20px]";
+  const contactFontClass = isCompact ? "text-[8px]" : isRelaxed ? "text-[9.5px]" : "text-[9px]";
   const sectionTitleClass = isModern
-    ? fit
+    ? isCompact
       ? "border-b border-zinc-900 pb-[3px] text-[10px] font-bold uppercase tracking-[0.12em] text-zinc-950"
+      : isRelaxed
+      ? "border-b border-zinc-900 pb-[5px] text-[11.5px] font-bold uppercase tracking-[0.12em] text-zinc-950"
       : "border-b border-zinc-900 pb-[4px] text-[11px] font-bold uppercase tracking-[0.12em] text-zinc-950"
-    : fit
+    : isCompact
       ? "border-b-[2px] border-black pb-[5px] text-[11.5px] font-bold uppercase tracking-[0.14em] text-black"
+      : isRelaxed
+      ? "border-b-[2px] border-black pb-[10px] text-[13.5px] font-bold uppercase tracking-[0.14em] text-black"
       : "border-b-[2px] border-black pb-[8px] text-[13px] font-bold uppercase tracking-[0.14em] text-black";
-  const dateClass = fit ? "shrink-0 text-right text-[8.5px] text-zinc-500" : "shrink-0 text-right text-[9.5px] text-zinc-500";
-  const gradeClass = fit ? "text-[9px] text-zinc-600" : "text-[10px] text-zinc-600";
-  const expTypeClass = fit ? "text-[9px] text-zinc-500" : "text-[10px] text-zinc-500";
-  const techStackClass = fit ? "text-[9.5px] text-zinc-600" : "text-[10.5px] text-zinc-600";
-  const skillLabelClass = fit ? "text-[9.5px]" : "text-[10px]";
-  const sigClass = fit ? "text-[8px]" : "text-[9px]";
-  const headerPbClass = fit ? "pb-[6px]" : "pb-[8px]";
-  const decSignatureGap = fit ? "mt-[8px]" : "mt-[12px]";
-  const decSignatureWidth = fit ? "w-[120px]" : "w-[144px]";
-  const decSignatureSpacer = fit ? "h-[18px]" : "h-[24px]";
+  const dateClass = isCompact ? "shrink-0 text-right text-[8.5px] text-zinc-500" : isRelaxed ? "shrink-0 text-right text-[10px] text-zinc-500" : "shrink-0 text-right text-[9.5px] text-zinc-500";
+  const gradeClass = isCompact ? "text-[9px] text-zinc-600" : isRelaxed ? "text-[10.5px] text-zinc-600" : "text-[10px] text-zinc-600";
+  const expTypeClass = isCompact ? "text-[9px] text-zinc-500" : isRelaxed ? "text-[10.5px] text-zinc-500" : "text-[10px] text-zinc-500";
+  const techStackClass = isCompact ? "text-[9.5px] text-zinc-600" : isRelaxed ? "text-[11px] text-zinc-600" : "text-[10.5px] text-zinc-600";
+  const skillLabelClass = isCompact ? "text-[9.5px]" : isRelaxed ? "text-[10.5px]" : "text-[10px]";
+  const sigClass = isCompact ? "text-[8px]" : isRelaxed ? "text-[9.5px]" : "text-[9px]";
+  const headerPbClass = isCompact ? "pb-[6px]" : isRelaxed ? "pb-[10px]" : "pb-[8px]";
+  const decSignatureGap = isCompact ? "mt-[8px]" : isRelaxed ? "mt-[15px]" : "mt-[12px]";
+  const decSignatureWidth = isCompact ? "w-[120px]" : isRelaxed ? "w-[150px]" : "w-[144px]";
+  const decSignatureSpacer = isCompact ? "h-[18px]" : isRelaxed ? "h-[28px]" : "h-[24px]";
 
   const SIDEBAR_SECTIONS = new Set<ReorderableSectionId>([
     "education",
@@ -446,9 +454,7 @@ export function ResumePaper({ resume }: { resume: Resume }) {
     <article
       className={articleClass}
       style={{
-        fontFamily: isModern
-          ? "var(--font-sans), ui-sans-serif, system-ui, sans-serif"
-          : "var(--font-resume)",
+        fontFamily: activeFontFamily,
       }}
     >
       {/* Header -- full-width for both per user selection */}
@@ -459,14 +465,14 @@ export function ResumePaper({ resume }: { resume: Resume }) {
             value={personal.fullName}
             placeholder="YOUR FULL NAME"
             transform="uppercase"
-            className={`${fit ? "text-[18px]" : "text-[21px]"} font-extrabold tracking-tight text-zinc-950`}
+            className={`${isCompact ? "text-[18px]" : isRelaxed ? "text-[23px]" : "text-[21px]"} font-extrabold tracking-tight text-zinc-950`}
             placeholderClassName="text-zinc-400"
             realClassName="text-zinc-950"
           />
           <PlaceholderText
             value={realContact}
             placeholder="email  •  phone  •  linkedin  •  github  •  location"
-            className={`${fit ? "text-[8px]" : "text-[9px]"} text-zinc-600 font-medium`}
+            className={`${isCompact ? "text-[8px]" : isRelaxed ? "text-[9.5px]" : "text-[9px]"} text-zinc-600 font-medium`}
             placeholderClassName="text-zinc-400"
             realClassName="text-zinc-600"
           />
@@ -493,9 +499,9 @@ export function ResumePaper({ resume }: { resume: Resume }) {
       )}
 
       {isModern ? (
-        <div className={`flex ${fit ? "gap-[16px]" : "gap-[22px]"} w-full flex-1`}>
+        <div className={`flex ${isCompact ? "gap-[16px]" : isRelaxed ? "gap-[26px]" : "gap-[22px]"} w-full flex-1`}>
           {/* Left Column (Sidebar: Education, Skills, Certifications, Languages, Declaration) */}
-          <div className={`w-[34%] shrink-0 flex flex-col ${fit ? "gap-[10px]" : "gap-[14px]"}`}>
+          <div className={`w-[34%] shrink-0 flex flex-col ${isCompact ? "gap-[10px]" : isRelaxed ? "gap-[18px]" : "gap-[14px]"}`}>
             {sidebarOrder.map((id) => sectionRenderers[id]())}
           </div>
 
@@ -503,7 +509,7 @@ export function ResumePaper({ resume }: { resume: Resume }) {
           <div className="w-[1px] bg-zinc-200 self-stretch shrink-0" />
 
           {/* Right Column (Main: Summary, Experience, Projects, Achievements, Custom) */}
-          <div className={`flex-1 min-w-0 flex flex-col ${fit ? "gap-[10px]" : "gap-[14px]"}`}>
+          <div className={`flex-1 min-w-0 flex flex-col ${isCompact ? "gap-[10px]" : isRelaxed ? "gap-[18px]" : "gap-[14px]"}`}>
             {mainOrder.map((id) => sectionRenderers[id]())}
           </div>
         </div>

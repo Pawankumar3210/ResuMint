@@ -39,11 +39,14 @@ export function useDemoResume() {
     demoLoadState.active = true;
 
     try {
-      // Preserve the user's active template selection and one-page fit mode
+      // Preserve the user's active template selection, typography, density, and one-page fit mode
       let building: Resume = {
         ...EMPTY_RESUME,
         template: resume.template,
         onePageFit: resume.onePageFit,
+        classicFont: resume.classicFont,
+        modernFont: resume.modernFont,
+        density: resume.density,
       };
       setResume(building);
 
@@ -63,7 +66,14 @@ export function useDemoResume() {
       demoLoadState.active = false;
       setIsLoadingDemo(false);
     }
-  }, [resume.template, resume.onePageFit, setResume]);
+  }, [
+    resume.template,
+    resume.onePageFit,
+    resume.classicFont,
+    resume.modernFont,
+    resume.density,
+    setResume,
+  ]);
 
   return { loadDemoResume, isLoadingDemo };
 }

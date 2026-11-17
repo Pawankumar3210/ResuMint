@@ -138,4 +138,7 @@ export const DEMO_RESUME: Resume = {
   sectionOrder: DEFAULT_SECTION_ORDER,
   onePageFit: false,
   template: "classic",
+  classicFont: "garamond",
+  modernFont: "inter",
+  density: "standard",
 };

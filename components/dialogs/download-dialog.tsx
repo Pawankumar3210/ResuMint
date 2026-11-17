@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Download, Loader2, ClipboardCopy, Check } from "lucide-react";
+import { Download, Loader2, ClipboardCopy, Check, FileCode, FileJson } from "lucide-react";
 import { Dialog } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { SegmentedControl } from "@/components/ui/segmented-control";
@@ -9,8 +9,10 @@ import { Button } from "@/components/ui/button";
 import { useResume } from "@/hooks/use-resume";
 import { useDownload } from "@/hooks/use-download";
 import { useToast } from "@/hooks/use-toast";
-import { suggestedFilename } from "@/lib/download-file";
+import { downloadBlob, suggestedFilename } from "@/lib/download-file";
 import { buildResumePlainText } from "@/utils/plainTextExport";
+import { generateLatexResume } from "@/utils/latexExport";
+import { downloadJsonResume } from "@/utils/jsonResume";
 import type { ExportFormat, PageLayout } from "@/types/export";
 
 export function DownloadDialog({
@@ -78,6 +80,30 @@ export function DownloadDialog({
     setTimeout(() => setJustCopied(false), 2000);
   };
 
+  const handleDownloadLatex = () => {
+    try {
+      const tex = generateLatexResume(resume);
+      const blob = new Blob([tex], { type: "text/x-tex;charset=utf-8" });
+      const name = `${filename.trim() || "Resume"}.tex`;
+      downloadBlob(blob, name);
+      showToast("LaTeX (.tex) exported successfully", "success");
+      onDownloaded(name);
+    } catch {
+      showToast("Failed to export LaTeX file", "error");
+    }
+  };
+
+  const handleDownloadJson = () => {
+    try {
+      const safeName = filename.trim() || "Resume";
+      downloadJsonResume(resume, safeName);
+      showToast("JSON Resume exported successfully", "success");
+      onDownloaded(`${safeName}.json`);
+    } catch {
+      showToast("Failed to export JSON file", "error");
+    }
+  };
+
   return (
     <Dialog open={open} onClose={onClose} title="Download Resume">
       <h2 className="mb-1 text-lg font-semibold tracking-tight text-foreground">Download Resume</h2>
@@ -100,65 +126,58 @@ export function DownloadDialog({
           options={[
             { value: "pdf", label: "PDF" },
             { value: "docx", label: "DOCX" },
-            { value: "json", label: "JSON" },
           ]}
         />
 
-        {format !== "json" && (
-          <SegmentedControl
-            label="Pages"
-            value={layout}
-            onChange={setLayout}
-            options={[
-              { value: "one", label: "One Page" },
-              { value: "two", label: "Two Pages" },
-            ]}
-          />
-        )}
-
-        {format === "json" && (
-          <p className="rounded-input border border-glass-border bg-muted/40 px-3.5 py-2.5 text-xs text-foreground-secondary">
-            Exports as the open-standard{" "}
-            <a
-              href="https://jsonresume.org/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline hover:text-foreground"
-            >
-              JSON Resume
-            </a>{" "}
-            format. Perfect for backups, moving between devices, or importing back into ResuMint.
-          </p>
-        )}
+        <SegmentedControl
+          label="Pages"
+          value={layout}
+          onChange={setLayout}
+          options={[
+            { value: "one", label: "One Page" },
+            { value: "two", label: "Two Pages" },
+          ]}
+        />
 
         {error && <p className="text-sm text-error">{error}</p>}
 
-        <div className="mt-1 flex flex-wrap items-center justify-end gap-x-3 gap-y-2">
-          <Button variant="ghost" size="sm" onClick={handleCopyText}>
-            {justCopied ? (
-              <>
-                <Check size={14} /> Copied
-              </>
-            ) : (
-              <>
-                <ClipboardCopy size={14} /> Copy as Text
-              </>
-            )}
-          </Button>
-          <Button variant="ghost" onClick={onClose} disabled={isDownloading}>
-            Cancel
-          </Button>
-          <Button onClick={handleDownload} disabled={isDownloading}>
-            {isDownloading ? (
-              <>
-                <Loader2 size={15} className="animate-spin" /> Generating...
-              </>
-            ) : (
-              <>
-                <Download size={15} /> Download
-              </>
-            )}
-          </Button>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-glass-border pt-3">
+          <div className="flex items-center gap-1">
+            <Button variant="ghost" size="sm" onClick={handleCopyText} title="Copy resume as plain text">
+              {justCopied ? (
+                <>
+                  <Check size={13} /> Copied
+                </>
+              ) : (
+                <>
+                  <ClipboardCopy size={13} /> Copy as Text
+                </>
+              )}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={handleDownloadLatex} title="Export Overleaf-compatible LaTeX (.tex)">
+              <FileCode size={13} /> LaTeX (.tex)
+            </Button>
+            <Button variant="ghost" size="sm" onClick={handleDownloadJson} title="Export open-standard JSON Resume (.json)">
+              <FileJson size={13} /> JSON (.json)
+            </Button>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" onClick={onClose} disabled={isDownloading}>
+              Cancel
+            </Button>
+            <Button onClick={handleDownload} disabled={isDownloading}>
+              {isDownloading ? (
+                <>
+                  <Loader2 size={15} className="animate-spin" /> Generating...
+                </>
+              ) : (
+                <>
+                  <Download size={15} /> Download
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </div>
     </Dialog>

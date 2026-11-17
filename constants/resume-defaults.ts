@@ -1,4 +1,13 @@
-import type { Resume, ReorderableSectionId, SectionId, SkillCategory, SkillCategoryConfig } from "@/types/resume";
+import type {
+  Resume,
+  ReorderableSectionId,
+  SectionId,
+  SkillCategory,
+  SkillCategoryConfig,
+  ClassicFont,
+  ModernFont,
+  ResumeDensity,
+} from "@/types/resume";
 import { ExperienceType, SECTION_IDS } from "@/types/resume";
 import type { ResumeStore, SavedResume } from "@/types/resume-store";
 import { createId } from "@/lib/id";
@@ -59,7 +68,30 @@ export const EMPTY_RESUME: Resume = {
   sectionOrder: DEFAULT_SECTION_ORDER,
   onePageFit: false,
   template: "classic",
+  classicFont: "garamond",
+  modernFont: "inter",
+  density: "standard",
 };
+
+export const CLASSIC_FONTS: { id: ClassicFont; label: string; fontFamily: string }[] = [
+  { id: "garamond", label: "Garamond", fontFamily: '"EB Garamond", Garamond, "Cormorant Garamond", Georgia, serif' },
+  { id: "merriweather", label: "Merriweather", fontFamily: '"Merriweather", Georgia, serif' },
+  { id: "times", label: "Times New Roman", fontFamily: '"Times New Roman", Times, "Liberation Serif", serif' },
+  { id: "lora", label: "Lora", fontFamily: '"Lora", Georgia, serif' },
+];
+
+export const MODERN_FONTS: { id: ModernFont; label: string; fontFamily: string }[] = [
+  { id: "inter", label: "Inter", fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' },
+  { id: "geist", label: "Geist Sans", fontFamily: 'var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
+  { id: "roboto", label: "Roboto", fontFamily: '"Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
+  { id: "opensans", label: "Open Sans", fontFamily: '"Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' },
+];
+
+export const DENSITY_OPTIONS: { id: ResumeDensity; label: string; description: string }[] = [
+  { id: "compact", label: "Compact", description: "Tighter margins & spacing" },
+  { id: "standard", label: "Standard", description: "Balanced default spacing" },
+  { id: "relaxed", label: "Relaxed", description: "Airy, open line spacing" },
+];
 
 export const SECTION_META: Record<
   SectionId,
@@ -225,6 +257,18 @@ export function mergeResumeWithDefaults(loaded: unknown, fallback: Resume): Resu
     sectionOrder: normalizeSectionOrder(l.sectionOrder),
     onePageFit: typeof l.onePageFit === "boolean" ? l.onePageFit : fallback.onePageFit ?? false,
     template: l.template === "modern" ? "modern" : (fallback.template ?? "classic"),
+    classicFont:
+      l.classicFont === "times" || l.classicFont === "merriweather" || l.classicFont === "lora" || l.classicFont === "garamond"
+        ? l.classicFont
+        : fallback.classicFont ?? "garamond",
+    modernFont:
+      l.modernFont === "geist" || l.modernFont === "roboto" || l.modernFont === "opensans" || l.modernFont === "inter"
+        ? l.modernFont
+        : fallback.modernFont ?? "inter",
+    density:
+      l.density === "compact" || l.density === "relaxed" || l.density === "standard"
+        ? l.density
+        : fallback.density ?? "standard",
   };
 }
 

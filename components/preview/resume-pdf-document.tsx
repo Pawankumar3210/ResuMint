@@ -39,9 +39,10 @@ Font.registerHyphenationCallback((word) => [word]);
  */
 export function ResumePdfDocument({ resume, layout }: { resume: Resume; layout: PageLayout }) {
   const isModern = resume.template === "modern";
+  const isCompact = layout === "one" || resume.density === "compact";
   const s = isModern
-    ? (layout === "one" || resume.onePageFit ? styles.modernCompact : styles.modernNormal)
-    : (layout === "one" || resume.onePageFit ? styles.compact : styles.normal);
+    ? (isCompact ? styles.modernCompact : styles.modernNormal)
+    : (isCompact ? styles.compact : styles.normal);
   const {
     personal,
     summary,

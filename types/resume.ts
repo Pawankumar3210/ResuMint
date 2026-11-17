@@ -125,6 +125,9 @@ export interface CustomSection {
 }
 
 export type ResumeTemplate = "classic" | "modern";
+export type ClassicFont = "garamond" | "merriweather" | "times" | "lora";
+export type ModernFont = "inter" | "geist" | "roboto" | "opensans";
+export type ResumeDensity = "compact" | "standard" | "relaxed";
 
 export interface Resume {
   personal: PersonalDetails;
@@ -166,11 +169,16 @@ export interface Resume {
    *  "personal", so existing resumes keep their current visual order
    *  unchanged until the person deliberately reorders something. */
   sectionOrder: ReorderableSectionId[];
-  /** When enabled, applies compact spacing, margins, and typography
-   *  calibrated to fit content onto a single physical page. */
-  onePageFit: boolean;
+  /** Optional legacy 1-page fit flag (deprecated in favor of density). */
+  onePageFit?: boolean;
   /** Visual template style: "classic" (single-column serif) or "modern" (two-column sans-serif). */
   template: ResumeTemplate;
+  /** ATS-safe font for Classic template. Defaults to "garamond". */
+  classicFont?: ClassicFont;
+  /** ATS-safe font for Modern template. Defaults to "inter". */
+  modernFont?: ModernFont;
+  /** Vertical rhythm and spacing density ("compact" | "standard" | "relaxed"). Defaults to "standard". */
+  density?: ResumeDensity;
 }
 
 export const SECTION_IDS = [

@@ -15,6 +15,9 @@ import type {
   SkillCategory,
   SkillCategoryConfig,
   ResumeTemplate,
+  ClassicFont,
+  ModernFont,
+  ResumeDensity,
 } from "@/types/resume";
 import { ExperienceType } from "@/types/resume";
 import type { SavedResume, ResumeStore } from "@/types/resume-store";
@@ -102,6 +105,9 @@ export interface ResumeContextValue {
 
   setOnePageFit: (enabled: boolean) => void;
   setTemplate: (template: ResumeTemplate) => void;
+  setClassicFont: (font: ClassicFont) => void;
+  setModernFont: (font: ModernFont) => void;
+  setDensity: (density: ResumeDensity) => void;
 
   setResume: (resume: Resume) => void;
   clearResume: () => void;
@@ -568,6 +574,9 @@ export function ResumeProvider({ children }: { children: React.ReactNode }) {
 
       setOnePageFit: (enabled) => commit((prev) => ({ ...prev, onePageFit: enabled })),
       setTemplate: (template) => commit((prev) => ({ ...prev, template })),
+      setClassicFont: (font) => commit((prev) => ({ ...prev, classicFont: font })),
+      setModernFont: (font) => commit((prev) => ({ ...prev, modernFont: font })),
+      setDensity: (density) => commit((prev) => ({ ...prev, density })),
 
       setResume: (next) => commit(() => next, { discrete: true }),
       clearResume: () =>
@@ -575,6 +584,9 @@ export function ResumeProvider({ children }: { children: React.ReactNode }) {
           ...EMPTY_RESUME,
           template: prev.template,
           onePageFit: prev.onePageFit,
+          classicFont: prev.classicFont,
+          modernFont: prev.modernFont,
+          density: prev.density,
         }), { discrete: true }),
       undo,
       redo,

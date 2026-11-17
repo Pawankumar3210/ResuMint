@@ -6,12 +6,15 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   Search, Download, Trash2, Sparkles, SunMoon, Upload, Undo2, Redo2,
   User, FileText, GraduationCap, Briefcase, FolderGit2, Wrench,
-  BadgeCheck, Trophy, Languages, FileSignature, LayoutList, Columns2, AlignJustify,
+  BadgeCheck, Trophy, Languages, FileSignature, LayoutList, Columns2,
+  Share2, SlidersHorizontal,
 } from "lucide-react";
 import { useCommandPalette } from "@/hooks/use-command-palette";
 import { useAppActions } from "@/hooks/use-app-actions";
 import { useTheme } from "@/hooks/use-theme";
 import { useResume } from "@/hooks/use-resume";
+import { useToast } from "@/hooks/use-toast";
+import { encodeResumeToHash } from "@/utils/shareResume";
 import { SECTION_META } from "@/constants/resume-defaults";
 import type { SectionId } from "@/types/resume";
 
@@ -43,7 +46,8 @@ export function CommandPalette() {
   const { open, setOpen } = useCommandPalette();
   const getActions = useAppActions();
   const { cycleTheme } = useTheme();
-  const { resume, setTemplate, setOnePageFit, undo, redo } = useResume();
+  const { showToast } = useToast();
+  const { resume, setTemplate, setDensity, undo, redo } = useResume();
 
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
@@ -87,11 +91,50 @@ export function CommandPalette() {
         run: () => setTemplate("classic"),
       },
       {
-        id: "toggle-one-page-fit",
-        label: resume.onePageFit ? "Disable 1-Page Fit" : "Snap to 1 Page (1-Page Fit)",
-        icon: AlignJustify,
+        id: "share-link",
+        label: "Share Resume Link (Zero-Backend)",
+        icon: Share2,
         group: "Actions",
-        run: () => setOnePageFit(!resume.onePageFit),
+        run: async () => {
+          try {
+            const hash = encodeResumeToHash(resume);
+            window.location.hash = hash;
+            await navigator.clipboard.writeText(window.location.href);
+            showToast("Shareable link copied to clipboard!", "success");
+          } catch {
+            showToast("Link set in URL hash — copy from address bar", "default");
+          }
+        },
+      },
+      {
+        id: "density-compact",
+        label: "Line Density: Compact (Tight spacing)",
+        icon: SlidersHorizontal,
+        group: "Actions",
+        run: () => {
+          setDensity("compact");
+          showToast("Density set to Compact", "success");
+        },
+      },
+      {
+        id: "density-standard",
+        label: "Line Density: Standard (Balanced spacing)",
+        icon: SlidersHorizontal,
+        group: "Actions",
+        run: () => {
+          setDensity("standard");
+          showToast("Density set to Standard", "success");
+        },
+      },
+      {
+        id: "density-relaxed",
+        label: "Line Density: Relaxed (Airy spacing)",
+        icon: SlidersHorizontal,
+        group: "Actions",
+        run: () => {
+          setDensity("relaxed");
+          showToast("Density set to Relaxed", "success");
+        },
       },
       {
         id: "demo",
@@ -136,7 +179,16 @@ export function CommandPalette() {
         run: () => getActions().jumpToSection?.(id),
       })),
     ],
-    [getActions, cycleTheme, resume.template, resume.onePageFit, setTemplate, setOnePageFit, undo, redo]
+    [
+      getActions,
+      cycleTheme,
+      resume,
+      setTemplate,
+      setDensity,
+      showToast,
+      undo,
+      redo,
+    ]
   );
 
   const filtered = useMemo(

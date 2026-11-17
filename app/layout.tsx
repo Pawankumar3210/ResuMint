@@ -8,6 +8,7 @@ import { AppActionsProvider } from "@/components/app-actions-provider";
 import { CommandPaletteProvider } from "@/components/command-palette-provider";
 import { GlobalShortcuts } from "@/components/global-shortcuts";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
+import { SharedResumeLoader } from "@/components/shared-resume-loader";
 import { AppBackground } from "@/components/app-background";
 import { SITE } from "@/constants/site";
 import "./globals.css";
@@ -68,6 +69,15 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${GeistSans.variable} ${GeistMono.variable} h-full antialiased`}
     >
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Lora:ital,wght@0,400..700;1,400..700&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Roboto:ital,wght@0,300;0,400;0,500;0,700;0,900;1,300;1,400;1,500;1,700;1,900&display=swap"
+        />
+      </head>
       <body className="min-h-full flex flex-col relative">
         <ThemeProvider>
           <ToastProvider>
@@ -76,6 +86,7 @@ export default function RootLayout({
                 <CommandPaletteProvider>
                   <AppBackground />
                   {children}
+                  <SharedResumeLoader />
                   <GlobalShortcuts />
                   <ServiceWorkerRegister />
                 </CommandPaletteProvider>

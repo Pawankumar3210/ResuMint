@@ -27,8 +27,22 @@ type DocxNode = Paragraph | Table;
  */
 export function buildResumeDocx(resume: Resume, layout: PageLayout): Document {
   const isModern = resume.template === "modern";
-  const FONT = isModern ? "Calibri" : "Times New Roman";
-  const compact = layout === "one" || resume.onePageFit;
+  const FONT = isModern
+    ? resume.modernFont === "roboto"
+      ? "Roboto"
+      : resume.modernFont === "opensans"
+      ? "Arial"
+      : resume.modernFont === "geist"
+      ? "Segoe UI"
+      : "Calibri"
+    : resume.classicFont === "garamond"
+    ? "Garamond"
+    : resume.classicFont === "merriweather"
+    ? "Georgia"
+    : resume.classicFont === "lora"
+    ? "Georgia"
+    : "Times New Roman";
+  const compact = layout === "one" || resume.density === "compact";
   const bodySize = compact ? 19 : 22; // half-points: 19 = 9.5pt, 22 = 11pt
   const spacingAfter = compact ? (isModern ? 60 : 80) : (isModern ? 100 : 140);
 

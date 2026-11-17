@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useRegisterAppAction } from "@/hooks/use-app-actions";
 import { PreviewToolbar } from "./preview-toolbar";
 import { ResumePaper, RESUME_PAPER_WIDTH_PX } from "./resume-paper";
+import { MobilePreviewModal } from "./mobile-preview-modal";
 import { DownloadDialog } from "@/components/dialogs/download-dialog";
 import { SuccessDialog } from "@/components/dialogs/success-dialog";
 import { ConfirmDialog } from "@/components/dialogs/confirm-dialog";
@@ -33,6 +34,7 @@ export function ResumePreview() {
   const [downloadOpen, setDownloadOpen] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
   const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
+  const [mobilePreviewOpen, setMobilePreviewOpen] = useState(false);
   const [downloadedFilename, setDownloadedFilename] = useState<string | null>(null);
 
   // Exposes these actions to the Command Palette / keyboard shortcuts.
@@ -131,6 +133,7 @@ export function ResumePreview() {
       <PreviewToolbar
         onDownloadClick={() => setDownloadOpen(true)}
         onClearClick={() => setClearConfirmOpen(true)}
+        onMobilePreviewClick={() => setMobilePreviewOpen(true)}
       />
 
       {/* Two nested wrappers implement "shrink to fit" -- the resume
@@ -218,8 +221,25 @@ export function ResumePreview() {
           >
             <Plus size={15} />
           </button>
+          <div className="h-4 w-[1px] bg-border/60 mx-0.5" />
+          <button
+            type="button"
+            onClick={() => setMobilePreviewOpen(true)}
+            aria-label="Open full-screen preview"
+            title="Full-screen preview"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-primary transition-colors hover:bg-muted"
+          >
+            <Maximize2 size={14} />
+          </button>
         </div>
       </div>
+
+      <MobilePreviewModal
+        open={mobilePreviewOpen}
+        onClose={() => setMobilePreviewOpen(false)}
+        resume={resume}
+        onDownloadClick={() => setDownloadOpen(true)}
+      />
 
       <DownloadDialog
         open={downloadOpen}
