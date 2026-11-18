@@ -146,7 +146,7 @@ export function ResumePreview() {
           (navbar, toolbar, tabs) at a normal, tap-friendly scale. */}
       <div
         ref={availableWidthRef}
-        className="min-h-0 flex-1 overflow-auto overscroll-contain"
+        className="min-h-0 flex-1 overflow-auto overscroll-auto"
         style={{ touchAction: "pan-x pan-y" }}
       >
         <div
