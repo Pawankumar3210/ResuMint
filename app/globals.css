@@ -300,12 +300,45 @@ body,
 }
 
 /* Resume "paper" always renders in light mode, independent of app theme,
-   since a resume is a real-world document meant to look the same everywhere. */
+   since a resume is a real-world document meant to look the same everywhere.
+   color-scheme: light tells the browser's native controls to use light mode,
+   but Tailwind dark: variants are driven by the .dark class on <html>, so they
+   still fire even inside this element. The rule below explicitly resets the
+   Tailwind v4 zinc / color-primitive CSS variables that the paper uses back to
+   their light-mode values whenever the app is in dark mode, so that hardcoded
+   classes like border-zinc-900, border-black, bg-zinc-200, text-zinc-500, etc.
+   always produce the correct light-mode colors on the paper canvas. */
 .resume-paper {
   background: var(--paper-bg);
   color: var(--paper-foreground);
   color-scheme: light;
   border-radius: var(--radius-card);
+}
+
+/* The real culprit: globals.css sets `* { border-color: var(--border) }`.
+   In dark mode --border is rgba(255,255,255,0.36) — nearly invisible on the
+   paper's white background. Reset it (and all zinc / black tokens) to their
+   light-mode values so every border inside the paper renders correctly,
+   regardless of the app's dark/light theme. */
+.dark .resume-paper,
+.dark .resume-paper * {
+  /* Restore the global default border color back to the light-mode token */
+  --border: rgba(9, 9, 11, 0.45);
+
+  /* Zinc scale — used for border-zinc-*, text-zinc-*, bg-zinc-* utilities */
+  --color-zinc-50:  oklch(98.5% 0 none);
+  --color-zinc-100: oklch(96.7% 0.001 286.375);
+  --color-zinc-200: oklch(92% 0.004 286.32);
+  --color-zinc-300: oklch(87.1% 0.006 286.286);
+  --color-zinc-400: oklch(70.5% 0.015 286.067);
+  --color-zinc-500: oklch(55.2% 0.016 285.938);
+  --color-zinc-600: oklch(44.2% 0.017 285.786);
+  --color-zinc-700: oklch(37% 0.013 285.805);
+  --color-zinc-800: oklch(27.4% 0.006 286.033);
+  --color-zinc-900: oklch(21% 0.006 285.885);
+  --color-zinc-950: oklch(14.1% 0.005 285.823);
+  --color-black: #000;
+  --color-white: #fff;
 }
 
 .typing-cursor {
