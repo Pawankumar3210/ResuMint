@@ -19,6 +19,14 @@ const PREVIEWABLE_SECTIONS: { id: SectionId; count: (r: NonNullable<ReturnType<t
   { id: "certifications", count: (r) => r.summary.certificationCount },
   { id: "achievements", count: (r) => r.data.achievements?.length ?? 0 },
   { id: "languages", count: (r) => r.data.languages?.length ?? 0 },
+  {
+    id: "declaration",
+    count: (r) =>
+      r.data.declaration &&
+      (r.data.declaration.text || r.data.declaration.place || r.data.declaration.date)
+        ? 1
+        : 0,
+  },
 ];
 
 export function ImportResumeDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -97,6 +105,13 @@ export function ImportResumeDialog({ open, onClose }: { open: boolean; onClose: 
             Here&apos;s what we found. Only checked items will be imported --
             sections that already have your content are left unchecked by default.
           </p>
+
+          {result.sectionOrder.length > 1 && (
+            <p className="rounded-input border border-glass-border bg-muted/40 px-3.5 py-2.5 text-xs text-foreground-secondary">
+              <span className="font-medium text-foreground">Detected order: </span>
+              {result.sectionOrder.map((id) => SECTION_META[id].label).join(" → ")}
+            </p>
+          )}
 
           <ul className="flex flex-col gap-2">
             {PREVIEWABLE_SECTIONS.filter((s) => s.count(result) > 0).map(({ id, count }) => {

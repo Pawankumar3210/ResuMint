@@ -170,7 +170,7 @@ export function ResumePaper({ resume }: { resume: Resume }) {
           sectionGap={sectionGap}
           sectionTitleClass={sectionTitleClass}
         >
-          <p>{summary.text}</p>
+          <p className="whitespace-pre-line">{summary.text}</p>
         </PlaceholderSection>
       ) : null,
 
@@ -267,7 +267,7 @@ export function ResumePaper({ resume }: { resume: Resume }) {
                   {joinNonEmpty([p.githubUrl, p.liveUrl])}
                 </span>
               </div>
-              {p.description && <p>{p.description}</p>}
+              {p.description && <p className="whitespace-pre-line">{p.description}</p>}
               {p.techStack?.trim() && (
                 <p className={techStackClass}>
                   <span className="font-semibold text-zinc-700">Tech Stack: </span>
@@ -393,7 +393,7 @@ export function ResumePaper({ resume }: { resume: Resume }) {
     declaration: () =>
       declaration.enabled && declaration.text.trim() ? (
         <Section key="declaration" title="Declaration" sectionGap={sectionGap} sectionTitleClass={sectionTitleClass}>
-          <p>{declaration.text}</p>
+          <p className="whitespace-pre-line">{declaration.text}</p>
           {(declaration.showPlace || declaration.showDate || declaration.showSignature) && (
             <div
               className={`${decSignatureGap} flex items-end gap-[24px] ${

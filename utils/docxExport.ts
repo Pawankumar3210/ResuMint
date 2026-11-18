@@ -124,11 +124,22 @@ export function buildResumeDocx(resume: Resume, layout: PageLayout): Document {
       ],
     });
 
-  const bodyPara = (text: string, opts: { italic?: boolean; bold?: boolean; color?: string } = {}) =>
-    new Paragraph({
+  const bodyPara = (text: string, opts: { italic?: boolean; bold?: boolean; color?: string } = {}) => {
+    const lines = text.replace(/\r\n?/g, "\n").split("\n");
+    while (lines.length > 1 && lines[lines.length - 1] === "") lines.pop();
+    return new Paragraph({
       spacing: { after: 40 },
-      children: [new TextRun({ text, size: bodySize, ...opts })],
+      children: lines.map(
+        (line, index) =>
+          new TextRun({
+            text: line,
+            size: bodySize,
+            ...opts,
+            ...(index > 0 ? { break: 1 } : {}),
+          })
+      ),
     });
+  };
 
   const entryHeadPara = (title: string, date: string) =>
     new Paragraph({
