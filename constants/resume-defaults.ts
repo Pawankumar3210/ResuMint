@@ -119,25 +119,22 @@ export const SECTION_META: Record<
  *  the total at 100. */
 /** Relative weight each section contributes to overall Resume Completion.
  *  Sums to 100. Core sections (personal, education, experience, etc.)
- *  are weighted higher than optional flourishes (declaration). custom
- *  and custom2 are deliberately weighted 0 -- they're genuinely bonus
- *  sections (most resumes will never use either), and per feedback,
- *  making them count against the percentage meant a resume with every
- *  *normal* section filled in could still be stuck below 100%, which
- *  reads as "something's still missing" when nothing actually is. Their
- *  3 points (2+1) were redistributed to personal/education/experience
- *  to keep the total at 100. */
+ *  are weighted higher than optional flourishes. Declaration and custom
+ *  sections are deliberately weighted 0 -- a resume with every normal
+ *  section filled in should read as 100%, even if an optional signature
+ *  block or custom section is unused. Declaration's 4 points were
+ *  redistributed to personal/education/experience. */
 export const SECTION_WEIGHTS: Record<SectionId, number> = {
-  personal: 16,
+  personal: 18,
   summary: 10,
-  education: 16,
-  experience: 16,
+  education: 17,
+  experience: 17,
   projects: 10,
   skills: 10,
   certifications: 7,
   achievements: 7,
   languages: 4,
-  declaration: 4,
+  declaration: 0,
   custom: 0,
   custom2: 0,
   custom3: 0,
