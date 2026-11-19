@@ -143,7 +143,7 @@ export function PagePreviewDialog({
         <div
           role="radiogroup"
           aria-label="Line density"
-          className="flex justify-self-center rounded-full border border-glass-border bg-muted/50 p-0.5 text-[11px] font-medium sm:justify-self-end sm:pr-10"
+          className="flex justify-self-center rounded-full border border-glass-border bg-muted/50 p-0.5 text-[11px] font-medium sm:justify-self-end sm:mr-10"
         >
           {DENSITY_OPTIONS.map((option) => {
             const isActive = (resume.density ?? "standard") === option.id;
