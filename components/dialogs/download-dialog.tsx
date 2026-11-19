@@ -19,10 +19,12 @@ export function DownloadDialog({
   open,
   onClose,
   onDownloaded,
+  initialLayout = "one",
 }: {
   open: boolean;
   onClose: () => void;
   onDownloaded: (filename: string) => void;
+  initialLayout?: PageLayout;
 }) {
   const { resume, resumes, activeResumeId } = useResume();
   const { download, isDownloading, error } = useDownload();
@@ -32,7 +34,7 @@ export function DownloadDialog({
 
   const [filename, setFilename] = useState(() => suggestedFilename(activeResumeName));
   const [format, setFormat] = useState<ExportFormat>("pdf");
-  const [layout, setLayout] = useState<PageLayout>("one");
+  const [layout, setLayout] = useState<PageLayout>(initialLayout);
   const [justCopied, setJustCopied] = useState(false);
 
   // Re-derive the suggested filename every time the dialog OPENS, so it
@@ -44,7 +46,10 @@ export function DownloadDialog({
   const [wasOpen, setWasOpen] = useState(open);
   if (open !== wasOpen) {
     setWasOpen(open);
-    if (open) setFilename(suggestedFilename(activeResumeName));
+    if (open) {
+      setFilename(suggestedFilename(activeResumeName));
+      setLayout(initialLayout);
+    }
   }
 
   const handleDownload = async () => {
@@ -105,7 +110,12 @@ export function DownloadDialog({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} title="Download Resume">
+    <Dialog
+      open={open}
+      onClose={onClose}
+      title="Download Resume"
+      overlayClassName="z-[60]"
+    >
       <h2 className="mb-1 text-lg font-semibold tracking-tight text-foreground">Download Resume</h2>
       <p className="mb-6 text-sm text-foreground-secondary">
         Choose a filename and format for your resume.

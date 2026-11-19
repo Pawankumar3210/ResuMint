@@ -12,6 +12,9 @@ interface DialogProps {
   title: string;
   children: React.ReactNode;
   className?: string;
+  /** Extra classes for the full-screen overlay wrapper, e.g. a higher
+   *  z-index when one dialog must open above another. */
+  overlayClassName?: string;
   /** Skips the default solid panel skin + padding, so the caller can
    *  fully control the panel's appearance (e.g. a custom-branded card
    *  that should look the same regardless of the site's light/dark
@@ -31,6 +34,7 @@ export function Dialog({
   title,
   children,
   className,
+  overlayClassName,
   unstyled = false,
   hideCloseButton = false,
 }: DialogProps) {
@@ -77,7 +81,10 @@ export function Dialog({
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          className={cn(
+            "fixed inset-0 z-50 flex items-center justify-center p-4",
+            overlayClassName
+          )}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

@@ -13,7 +13,7 @@ import {
   Share2,
   Check,
   ChevronDown,
-  Maximize2,
+  Eye,
 } from "lucide-react";
 import { useDemoResume } from "@/hooks/use-demo-resume";
 import { useToast } from "@/hooks/use-toast";
@@ -30,11 +30,11 @@ import { cn } from "@/lib/utils";
 export function PreviewToolbar({
   onDownloadClick,
   onClearClick,
-  onMobilePreviewClick,
+  onPreviewClick,
 }: {
   onDownloadClick: () => void;
   onClearClick: () => void;
-  onMobilePreviewClick?: () => void;
+  onPreviewClick: () => void;
 }) {
   const { loadDemoResume, isLoadingDemo } = useDemoResume();
   const { showToast } = useToast();
@@ -346,19 +346,16 @@ export function PreviewToolbar({
           )}
         </button>
 
-        {/* Mobile Full-Screen Preview trigger */}
-        {onMobilePreviewClick && (
-          <button
-            type="button"
-            onClick={onMobilePreviewClick}
-            aria-label="Full-screen preview"
-            title="Open full-screen mobile preview"
-            className="flex items-center gap-1.5 rounded-button border border-glass-border px-2.5 py-1.5 text-xs font-medium text-foreground-secondary transition-colors hover:border-primary/40 hover:text-foreground lg:hidden"
-          >
-            <Maximize2 size={13} />
-            <span className="text-xs">Preview</span>
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={onPreviewClick}
+          aria-label="Preview exact A4 pages"
+          title="Preview the exact A4 pages"
+          className="flex items-center gap-1.5 rounded-button border border-primary/30 bg-primary/10 px-2.5 py-1.5 text-xs font-medium text-primary transition-colors hover:border-primary/50 hover:bg-primary/15 sm:px-3"
+        >
+          <Eye size={13} />
+          <span>Preview</span>
+        </button>
 
         <button
           type="button"

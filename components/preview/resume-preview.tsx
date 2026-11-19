@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useRegisterAppAction } from "@/hooks/use-app-actions";
 import { PreviewToolbar } from "./preview-toolbar";
 import { ResumePaper, RESUME_PAPER_WIDTH_PX } from "./resume-paper";
-import { MobilePreviewModal } from "./mobile-preview-modal";
+import { PagePreviewDialog } from "./page-preview-dialog";
 import { DownloadDialog } from "@/components/dialogs/download-dialog";
 import { SuccessDialog } from "@/components/dialogs/success-dialog";
 import { ConfirmDialog } from "@/components/dialogs/confirm-dialog";
@@ -32,13 +32,19 @@ export function ResumePreview() {
   const { showToast } = useToast();
 
   const [downloadOpen, setDownloadOpen] = useState(false);
+  const [downloadInitialLayout, setDownloadInitialLayout] = useState<"one" | "two">("one");
   const [successOpen, setSuccessOpen] = useState(false);
   const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
-  const [mobilePreviewOpen, setMobilePreviewOpen] = useState(false);
+  const [pagePreviewOpen, setPagePreviewOpen] = useState(false);
   const [downloadedFilename, setDownloadedFilename] = useState<string | null>(null);
 
+  const openDownloadDialog = (initialLayout: "one" | "two") => {
+    setDownloadInitialLayout(initialLayout);
+    setDownloadOpen(true);
+  };
+
   // Exposes these actions to the Command Palette / keyboard shortcuts.
-  useRegisterAppAction("openDownloadDialog", () => setDownloadOpen(true));
+  useRegisterAppAction("openDownloadDialog", () => openDownloadDialog("one"));
   useRegisterAppAction("requestClearResume", () => setClearConfirmOpen(true));
   useRegisterAppAction("loadDemoResume", () => {
     loadDemoResume().then(() => showToast("Demo Loaded", "success"));
@@ -131,9 +137,9 @@ export function ResumePreview() {
   return (
     <div className="relative flex h-full min-h-0 flex-col gap-4 overflow-hidden p-3 sm:p-6">
       <PreviewToolbar
-        onDownloadClick={() => setDownloadOpen(true)}
+        onDownloadClick={() => openDownloadDialog("one")}
         onClearClick={() => setClearConfirmOpen(true)}
-        onMobilePreviewClick={() => setMobilePreviewOpen(true)}
+        onPreviewClick={() => setPagePreviewOpen(true)}
       />
 
       {/* Two nested wrappers implement "shrink to fit" -- the resume
@@ -224,9 +230,9 @@ export function ResumePreview() {
           <div className="h-4 w-[1px] bg-border/60 mx-0.5" />
           <button
             type="button"
-            onClick={() => setMobilePreviewOpen(true)}
-            aria-label="Open full-screen preview"
-            title="Full-screen preview"
+            onClick={() => setPagePreviewOpen(true)}
+            aria-label="Open A4 preview"
+            title="A4 preview"
             className="flex h-8 w-8 items-center justify-center rounded-full text-primary transition-colors hover:bg-muted"
           >
             <Maximize2 size={14} />
@@ -234,15 +240,16 @@ export function ResumePreview() {
         </div>
       </div>
 
-      <MobilePreviewModal
-        open={mobilePreviewOpen}
-        onClose={() => setMobilePreviewOpen(false)}
+      <PagePreviewDialog
+        open={pagePreviewOpen}
+        onClose={() => setPagePreviewOpen(false)}
+        onDownloadClick={() => openDownloadDialog("two")}
         resume={resume}
-        onDownloadClick={() => setDownloadOpen(true)}
       />
 
       <DownloadDialog
         open={downloadOpen}
+        initialLayout={downloadInitialLayout}
         onClose={() => setDownloadOpen(false)}
         onDownloaded={(filename) => {
           setDownloadedFilename(filename);

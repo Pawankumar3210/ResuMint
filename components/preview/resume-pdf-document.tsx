@@ -40,9 +40,10 @@ Font.registerHyphenationCallback((word) => [word]);
 export function ResumePdfDocument({ resume, layout }: { resume: Resume; layout: PageLayout }) {
   const isModern = resume.template === "modern";
   const isCompact = layout === "one" || resume.density === "compact";
+  const isRelaxed = !isCompact && resume.density === "relaxed";
   const s = isModern
-    ? (isCompact ? styles.modernCompact : styles.modernNormal)
-    : (isCompact ? styles.compact : styles.normal);
+    ? (isCompact ? styles.modernCompact : isRelaxed ? styles.modernRelaxed : styles.modernNormal)
+    : (isCompact ? styles.compact : isRelaxed ? styles.relaxed : styles.normal);
   const {
     personal,
     summary,
@@ -461,6 +462,30 @@ const styles = {
     signatureName: { fontFamily: "Times-Italic", fontSize: 10.5, color: "#000000" },
     signatureLabel: { fontSize: 7, color: "#71717A", textTransform: "uppercase", letterSpacing: 0.8, marginTop: 1.5 },
   }),
+  relaxed: StyleSheet.create({
+    page: { paddingHorizontal: 44, paddingVertical: 50, fontSize: 12, lineHeight: 1.7 },
+    name: { ...shared.name, fontSize: 22, marginBottom: 5, letterSpacing: -0.44 },
+    contact: { fontSize: 9.5, color: "#52525B", textAlign: "center" },
+    section: { marginBottom: 14 },
+    sectionTitle: {
+      fontFamily: "Times-Bold",
+      fontSize: 11,
+      textTransform: "uppercase",
+      letterSpacing: 1.7,
+      color: "#000000",
+      borderBottom: "1.5px solid #333333",
+      paddingBottom: 4,
+      marginBottom: 7,
+    },
+    entry: { marginBottom: 10 },
+    entryTitle: { ...shared.entryTitle, fontSize: 12 },
+    entryDate: { fontSize: 9.5, color: "#71717A" },
+    entrySub: { fontSize: 10, color: "#52525B", marginTop: 1.5 },
+    body: { fontSize: 12, color: "#3F3F46", marginTop: 3 },
+    bullet: { fontSize: 12, color: "#3F3F46", marginBottom: 3 },
+    signatureName: { fontFamily: "Times-Italic", fontSize: 13, color: "#000000" },
+    signatureLabel: { fontSize: 8.5, color: "#71717A", textTransform: "uppercase", letterSpacing: 1.1, marginTop: 2.5 },
+  }),
   modernNormal: StyleSheet.create({
     page: { paddingHorizontal: 36, paddingVertical: 34, fontSize: 10, lineHeight: 1.5 },
     name: { ...modernShared.name, fontSize: 18, marginBottom: 3, letterSpacing: -0.2 },
@@ -484,6 +509,30 @@ const styles = {
     bullet: { fontSize: 9.5, color: "#3F3F46", marginBottom: 2 },
     signatureName: { fontFamily: "Helvetica-Oblique", fontSize: 11, color: "#000000" },
     signatureLabel: { fontSize: 7.5, color: "#71717A", textTransform: "uppercase", letterSpacing: 1, marginTop: 2 },
+  }),
+  modernRelaxed: StyleSheet.create({
+    page: { paddingHorizontal: 40, paddingVertical: 40, fontSize: 11, lineHeight: 1.62 },
+    name: { ...modernShared.name, fontSize: 19.5, marginBottom: 4, letterSpacing: -0.3 },
+    contact: { fontSize: 9, color: "#52525B", textAlign: "left" },
+    section: { marginBottom: 13 },
+    sectionTitle: {
+      fontFamily: "Helvetica-Bold",
+      fontSize: 10.5,
+      textTransform: "uppercase",
+      letterSpacing: 1.3,
+      color: "#09090b",
+      borderBottom: "1px solid #71717A",
+      paddingBottom: 2.5,
+      marginBottom: 6,
+    },
+    entry: { marginBottom: 8.5 },
+    entryTitle: { ...modernShared.entryTitle, fontSize: 10.5 },
+    entryDate: { fontSize: 9, color: "#71717A" },
+    entrySub: { fontSize: 9.5, color: "#52525B", marginTop: 1.5 },
+    body: { fontSize: 10.5, color: "#3F3F46", marginTop: 2.5 },
+    bullet: { fontSize: 10.5, color: "#3F3F46", marginBottom: 2.5 },
+    signatureName: { fontFamily: "Helvetica-Oblique", fontSize: 12, color: "#000000" },
+    signatureLabel: { fontSize: 8, color: "#71717A", textTransform: "uppercase", letterSpacing: 1.1, marginTop: 2.5 },
   }),
   modernCompact: StyleSheet.create({
     page: { paddingHorizontal: 30, paddingVertical: 26, fontSize: 9, lineHeight: 1.38 },
