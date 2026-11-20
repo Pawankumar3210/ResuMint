@@ -7,7 +7,7 @@ import {
   Search, Download, Trash2, Sparkles, SunMoon, Upload, Undo2, Redo2,
   User, FileText, GraduationCap, Briefcase, FolderGit2, Wrench,
   BadgeCheck, Trophy, Languages, FileSignature, LayoutList, Columns2,
-  Share2, SlidersHorizontal,
+  Share2, SlidersHorizontal, ScanSearch,
 } from "lucide-react";
 import { useCommandPalette } from "@/hooks/use-command-palette";
 import { useAppActions } from "@/hooks/use-app-actions";
@@ -68,6 +68,13 @@ export function CommandPalette() {
         icon: Upload,
         group: "Actions",
         run: () => getActions().openImportDialog?.(),
+      },
+      {
+        id: "ats-insights",
+        label: "Analyze Job Description (ATS Insights)",
+        icon: ScanSearch,
+        group: "Actions",
+        run: () => getActions().openAtsInsights?.(),
       },
       {
         id: "switch-template-toggle",

@@ -2,24 +2,29 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Upload } from "lucide-react";
+import { ScanSearch, Upload } from "lucide-react";
 import { useCompletion } from "@/hooks/use-completion";
+import { useResume } from "@/hooks/use-resume";
 import { useRegisterAppAction } from "@/hooks/use-app-actions";
 import { useToast } from "@/hooks/use-toast";
 import { isProgrammaticLoadActive } from "@/lib/programmatic-load-state";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { ConfettiBurst } from "@/components/ui/confetti-burst";
+import { AtsInsightsDialog } from "@/components/ats/ats-insights-dialog";
 import { ImportResumeDialog } from "@/components/dialogs/import-resume-dialog";
 import { ResumeSwitcher } from "@/components/builder/resume-switcher";
 
 export function BuilderHeader() {
   const { percentage } = useCompletion();
+  const { resume } = useResume();
   const [importOpen, setImportOpen] = useState(false);
+  const [atsInsightsOpen, setAtsInsightsOpen] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const { showToast } = useToast();
   const previousPercentage = useRef<number | null>(null);
 
   useRegisterAppAction("openImportDialog", () => setImportOpen(true));
+  useRegisterAppAction("openAtsInsights", () => setAtsInsightsOpen(true));
 
   // Celebrate only a genuine transition into 100% during this session --
   // never on initial mount, even if the resume (e.g. restored from a
@@ -43,7 +48,7 @@ export function BuilderHeader() {
 
   return (
     <div className="flex flex-col gap-4 border-b border-glass-border px-5 py-5">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="min-w-0 truncate font-mono text-base font-semibold tracking-tight text-foreground">
           <motion.span
             initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
@@ -54,11 +59,22 @@ export function BuilderHeader() {
             Resume Builder
           </motion.span>
         </h2>
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex w-full items-center justify-end gap-1.5 sm:w-auto sm:gap-2">
+          <button
+            type="button"
+            onClick={() => setAtsInsightsOpen(true)}
+            aria-label="Open ATS Insights"
+            title="Compare your resume with a job description"
+            className="flex shrink-0 items-center gap-2 rounded-button border border-primary/35 bg-primary/5 px-2 py-2 text-sm font-medium text-foreground transition-all duration-200 hover:border-primary/55 hover:bg-primary/10 hover:text-primary hover:shadow-[0_0_24px_-2px_var(--color-primary)] focus-visible:ring-2 focus-visible:ring-primary/40 sm:px-4 sm:hover:shadow-[0_0_28px_-2px_var(--color-primary)]"
+          >
+            <ScanSearch size={15} className="sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">ATS Insights</span>
+          </button>
           <ResumeSwitcher />
           <button
             type="button"
             onClick={() => setImportOpen(true)}
+            aria-label="Import resume"
             className="flex shrink-0 items-center gap-1.5 rounded-button px-3 py-1.5 text-xs font-medium text-foreground-secondary transition-colors hover:bg-muted hover:text-foreground"
           >
             <Upload size={13} /> Import Resume
@@ -76,6 +92,11 @@ export function BuilderHeader() {
       </div>
 
       <ImportResumeDialog open={importOpen} onClose={() => setImportOpen(false)} />
+      <AtsInsightsDialog
+        open={atsInsightsOpen}
+        onClose={() => setAtsInsightsOpen(false)}
+        resume={resume}
+      />
     </div>
   );
 }

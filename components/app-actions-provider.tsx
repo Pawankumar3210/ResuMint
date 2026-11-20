@@ -6,6 +6,7 @@ import type { SectionId } from "@/types/resume";
 export interface AppActions {
   openDownloadDialog?: () => void;
   openImportDialog?: () => void;
+  openAtsInsights?: () => void;
   requestClearResume?: () => void;
   loadDemoResume?: () => void;
   jumpToSection?: (id: SectionId) => void;
