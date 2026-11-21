@@ -110,7 +110,7 @@ export function PreviewToolbar({
         </h2>
       </div>
 
-      <div className="flex flex-wrap items-center gap-[8px] text-[12.4px] leading-[1.33]">
+      <div className="flex flex-wrap items-center gap-[7.6px] text-[11.78px] leading-[1.33]">
         {/* Animated Sleek Template Switcher: Classic vs Modern with gliding spring pill */}
         <div
           role="radiogroup"
@@ -124,7 +124,7 @@ export function PreviewToolbar({
             onClick={() => setTemplate("classic")}
             title="Classic: Single-column serif layout"
             className={cn(
-              "relative z-10 flex items-center gap-[6px] rounded-full px-[10.35px] py-[4.15px] font-medium transition-colors duration-200",
+              "relative z-10 flex items-center gap-[5.7px] rounded-full px-[9.83px] py-[3.94px] font-medium transition-colors duration-200",
               currentTemplate === "classic"
                 ? "text-primary-foreground font-semibold"
                 : "text-foreground-secondary hover:text-foreground"
@@ -137,9 +137,9 @@ export function PreviewToolbar({
                 transition={{ type: "spring", stiffness: 500, damping: 35 }}
               />
             )}
-            <span className="relative z-10 flex items-center gap-[6px]">
+            <span className="relative z-10 flex items-center gap-[5.7px]">
               <FileText
-                size={13}
+                size={12.35}
                 className={cn("transition-opacity", currentTemplate === "classic" ? "opacity-100" : "opacity-60")}
               />
               Classic
@@ -153,7 +153,7 @@ export function PreviewToolbar({
             onClick={() => setTemplate("modern")}
             title="Modern: Two-column sans-serif layout"
             className={cn(
-              "relative z-10 flex items-center gap-[6px] rounded-full px-[10.35px] py-[4.15px] font-medium transition-colors duration-200",
+              "relative z-10 flex items-center gap-[5.7px] rounded-full px-[9.83px] py-[3.94px] font-medium transition-colors duration-200",
               currentTemplate === "modern"
                 ? "text-primary-foreground font-semibold"
                 : "text-foreground-secondary hover:text-foreground"
@@ -166,9 +166,9 @@ export function PreviewToolbar({
                 transition={{ type: "spring", stiffness: 500, damping: 35 }}
               />
             )}
-            <span className="relative z-10 flex items-center gap-[6px]">
+            <span className="relative z-10 flex items-center gap-[5.7px]">
               <Columns2
-                size={13}
+                size={12.35}
                 className={cn("transition-opacity", currentTemplate === "modern" ? "opacity-100" : "opacity-60")}
               />
               Modern
@@ -184,16 +184,16 @@ export function PreviewToolbar({
             aria-label="Appearance settings: Font and Density"
             title={`Font: ${activeFontLabel} | Density: ${activeDensity}`}
             className={cn(
-              "flex items-center gap-[6px] rounded-button border px-[10.35px] py-[6.2px] font-medium transition-all sm:px-[12.4px]",
+              "flex items-center gap-[5.7px] rounded-button border px-[9.83px] py-[5.89px] font-medium transition-all sm:px-[11.78px]",
               appearanceOpen
                 ? "border-primary/60 bg-primary/10 text-primary"
                 : "border-glass-border text-foreground-secondary hover:border-primary/40 hover:text-foreground"
             )}
           >
-            <SlidersHorizontal size={14} />
+            <SlidersHorizontal size={13.3} />
             <span className="hidden sm:inline">Appearance</span>
             <ChevronDown
-              size={12}
+              size={11.4}
               className={cn("transition-transform duration-200", appearanceOpen && "rotate-180")}
             />
           </button>
@@ -319,9 +319,9 @@ export function PreviewToolbar({
           onClick={handleDemo}
           disabled={isLoadingDemo}
           aria-label={isLoadingDemo ? "Loading demo resume" : "Try demo resume"}
-          className="flex items-center gap-[6px] rounded-button border border-glass-border px-[10.35px] py-[6.2px] font-medium text-foreground-secondary transition-colors hover:border-primary/40 hover:text-foreground disabled:opacity-60 sm:px-[12.4px]"
+          className="flex items-center gap-[5.7px] rounded-button border border-glass-border px-[9.83px] py-[5.89px] font-medium text-foreground-secondary transition-colors hover:border-primary/40 hover:text-foreground disabled:opacity-60 sm:px-[11.78px]"
         >
-          {isLoadingDemo ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+          {isLoadingDemo ? <Loader2 size={13.3} className="animate-spin" /> : <Sparkles size={13.3} />}
           <span className="hidden sm:inline">{isLoadingDemo ? "Loading..." : "Try Demo"}</span>
         </button>
 
@@ -331,16 +331,16 @@ export function PreviewToolbar({
           onClick={handleShare}
           aria-label="Share resume via URL link"
           title="Create a shareable link encoded directly into the URL (Zero backend)"
-          className="flex items-center gap-[6px] rounded-button border border-glass-border px-[10.35px] py-[6.2px] font-medium text-foreground-secondary transition-colors hover:border-primary/40 hover:text-foreground sm:px-[12.4px]"
+          className="flex items-center gap-[5.7px] rounded-button border border-glass-border px-[9.83px] py-[5.89px] font-medium text-foreground-secondary transition-colors hover:border-primary/40 hover:text-foreground sm:px-[11.78px]"
         >
           {shareCopied ? (
             <>
-              <Check size={14} className="text-emerald-500" />
+              <Check size={13.3} className="text-emerald-500" />
               <span className="hidden sm:inline text-emerald-500">Copied!</span>
             </>
           ) : (
             <>
-              <Share2 size={14} />
+              <Share2 size={13.3} />
               <span className="hidden sm:inline">Share</span>
             </>
           )}
@@ -351,9 +351,9 @@ export function PreviewToolbar({
           onClick={onPreviewClick}
           aria-label="Preview exact A4 pages"
           title="Preview the exact A4 pages"
-          className="flex items-center gap-[6px] rounded-button border border-primary/30 bg-primary/10 px-[10.35px] py-[6.2px] font-medium text-primary transition-colors hover:border-primary/50 hover:bg-primary/15 sm:px-[12.4px]"
+          className="flex items-center gap-[5.7px] rounded-button border border-primary/30 bg-primary/10 px-[9.83px] py-[5.89px] font-medium text-primary transition-colors hover:border-primary/50 hover:bg-primary/15 sm:px-[11.78px]"
         >
-          <Eye size={14} />
+          <Eye size={13.3} />
           <span>Preview</span>
         </button>
 
@@ -361,18 +361,18 @@ export function PreviewToolbar({
           type="button"
           onClick={onClearClick}
           aria-label="Clear resume"
-          className="flex items-center gap-[6px] rounded-button px-[10.35px] py-[6.2px] font-medium text-foreground-secondary transition-colors hover:bg-error/10 hover:text-error sm:px-[12.4px]"
+          className="flex items-center gap-[5.7px] rounded-button px-[9.83px] py-[5.89px] font-medium text-foreground-secondary transition-colors hover:bg-error/10 hover:text-error sm:px-[11.78px]"
         >
-          <Trash2 size={14} /> <span className="hidden sm:inline">Clear</span>
+          <Trash2 size={13.3} /> <span className="hidden sm:inline">Clear</span>
         </button>
 
         <button
           type="button"
           onClick={onDownloadClick}
           aria-label="Download resume"
-          className="flex items-center gap-[6px] rounded-button bg-primary px-[12.4px] py-[6.2px] font-medium text-primary-foreground transition-all hover:-translate-y-[1px] hover:shadow-[0_0_20px_-4px_var(--color-primary)] active:translate-y-0 animate-cta-pulse sm:px-[14.5px]"
+          className="flex items-center gap-[5.7px] rounded-button bg-primary px-[11.78px] py-[5.89px] font-medium text-primary-foreground transition-all hover:-translate-y-[1px] hover:shadow-[0_0_20px_-4px_var(--color-primary)] active:translate-y-0 animate-cta-pulse sm:px-[13.78px]"
         >
-          <Download size={14} /> <span className="hidden sm:inline">Download ▾</span>
+          <Download size={13.3} /> <span className="hidden sm:inline">Download ▾</span>
         </button>
       </div>
     </div>
