@@ -41,8 +41,8 @@ export function AtsTextPreview({ resume }: { resume: Resume }) {
   };
 
   return (
-    <div className="space-y-4">
-      <section className="rounded-card border border-glass-border bg-muted/20 p-4">
+    <div className="ats-stagger space-y-4">
+      <section className="ats-card rounded-card border border-glass-border bg-muted/20 p-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <div className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
@@ -86,7 +86,7 @@ export function AtsTextPreview({ resume }: { resume: Resume }) {
         )}
       </section>
 
-      <section className="overflow-hidden rounded-card border border-glass-border bg-popover/60">
+      <section className="ats-card overflow-hidden rounded-card border border-glass-border bg-popover/60">
         <div className="flex items-center justify-between gap-2 border-b border-glass-border px-3.5 py-2.5">
           <span className="text-[11px] font-medium text-foreground">Parser-style preview</span>
           <span className="flex items-center gap-1 text-[10px] text-success">

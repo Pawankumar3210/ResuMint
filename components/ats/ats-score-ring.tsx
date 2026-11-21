@@ -40,7 +40,7 @@ export function AtsScoreRing({
 
   return (
     <div
-      className={cn("relative shrink-0 rounded-full p-[5px]", dimension)}
+      className={cn("ats-score-ring relative shrink-0 rounded-full p-[5px]", dimension)}
       style={{
         background: `conic-gradient(${scoreColor(clamped)} ${clamped * 3.6}deg, color-mix(in srgb, var(--foreground) 10%, transparent) 0deg)`,
       }}

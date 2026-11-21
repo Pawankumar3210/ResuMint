@@ -13,6 +13,7 @@ import {
   GraduationCap,
   Info,
   Lightbulb,
+  ListPlus,
   Minus,
   ShieldCheck,
   Target,
@@ -34,7 +35,7 @@ import type {
 import { cn } from "@/lib/utils";
 import { AtsScoreRing, scoreLabel, scoreTextClass } from "./ats-score-ring";
 
-const CARD_CLASS = "rounded-card border border-glass-border bg-muted/20 p-4";
+const CARD_CLASS = "ats-card rounded-card border border-glass-border bg-muted/20 p-4";
 
 function coverageText(keyword: AtsKeyword): string {
   if (keyword.coverage === "skills") return "Skills list only";
@@ -101,6 +102,11 @@ function formatCheckpointDate(timestamp: number): string {
   }).format(new Date(timestamp));
 }
 
+function summarizeLabels(labels: string[]): string {
+  if (labels.length <= 3) return labels.join(", ");
+  return `${labels.slice(0, 3).join(", ")} and ${labels.length - 3} more`;
+}
+
 function deltaTone(value: number, goodWhenPositive: boolean): string {
   if (value === 0) return "text-foreground-secondary";
   const isGood = goodWhenPositive ? value > 0 : value < 0;
@@ -134,6 +140,7 @@ interface AtsOverviewPanelProps {
   checkpointMatchesJob: boolean;
   canAddSkill: (keyword: AtsKeyword) => boolean;
   onAddSkill: (keyword: AtsKeyword) => boolean;
+  onAddSkills: (keywords: AtsKeyword[]) => string[];
   onUndoAddSkill: () => void;
   onJumpToSection: (section: AtsSection) => void;
   onSaveCheckpoint: () => void;
@@ -148,6 +155,7 @@ export function AtsOverviewPanel({
   checkpointMatchesJob,
   canAddSkill,
   onAddSkill,
+  onAddSkills,
   onUndoAddSkill,
   onJumpToSection,
   onSaveCheckpoint,
@@ -160,8 +168,10 @@ export function AtsOverviewPanel({
   const weakCritical = criticalKeywords.filter(
     (keyword) => keyword.coverage !== "strong"
   );
+  const addableGaps = criticalKeywords.filter(canAddSkill);
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
-  const [lastAdded, setLastAdded] = useState<string | null>(null);
+  const [bulkConfirming, setBulkConfirming] = useState(false);
+  const [lastAdded, setLastAdded] = useState<string[] | null>(null);
 
   const priorityRows = [
     {
@@ -195,11 +205,19 @@ export function AtsOverviewPanel({
   const handleConfirmAdd = (keyword: AtsKeyword) => {
     const added = onAddSkill(keyword);
     setConfirmingId(null);
-    if (added) setLastAdded(keyword.label);
+    setBulkConfirming(false);
+    if (added) setLastAdded([keyword.label]);
+  };
+
+  const handleConfirmAddAll = () => {
+    const addedLabels = onAddSkills(addableGaps);
+    setBulkConfirming(false);
+    setConfirmingId(null);
+    if (addedLabels.length > 0) setLastAdded(addedLabels);
   };
 
   return (
-    <div className="space-y-4">
+    <div className="ats-stagger space-y-4">
       <div className="grid gap-3 sm:grid-cols-2">
         <div className={CARD_CLASS}>
           <div className="flex items-center justify-between gap-3">
@@ -289,7 +307,7 @@ export function AtsOverviewPanel({
           <p className="mt-1 text-[11px] leading-relaxed text-foreground-secondary">
             Clear requirements found in the job description, checked against your resume.
           </p>
-          <ul className="mt-3 space-y-2">
+          <ul className="ats-stagger mt-3 space-y-2">
             {analysis.requirements.map((check) => {
               const RequirementHeadingIcon = requirementIconForId(check.id);
               return (
@@ -318,20 +336,76 @@ export function AtsOverviewPanel({
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
         <section className={CARD_CLASS}>
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-sm font-semibold text-foreground">Must-have gaps</h3>
-            <span className="text-[11px] text-foreground-secondary">
-              {weakCritical.length > 5
-                ? `Showing 5 of ${weakCritical.length}`
-                : `${weakCritical.length} to review`}
-            </span>
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <span className="text-[11px] text-foreground-secondary">
+                {weakCritical.length > 5
+                  ? `Showing 5 of ${weakCritical.length}`
+                  : `${weakCritical.length} to review`}
+              </span>
+              {addableGaps.length > 1 && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    setConfirmingId(null);
+                    setBulkConfirming((current) => !current);
+                  }}
+                  aria-expanded={bulkConfirming}
+                  aria-controls={bulkConfirming ? "ats-bulk-add-confirm" : undefined}
+                >
+                  <ListPlus size={13} />
+                  Add All ({addableGaps.length})
+                </Button>
+              )}
+            </div>
           </div>
 
-          {lastAdded && (
-            <div className="mt-3 flex items-center gap-2 rounded-input border border-success/25 bg-success/10 px-3 py-2">
+          {bulkConfirming && (
+            <div
+              id="ats-bulk-add-confirm"
+              className="ats-pop mt-3 rounded-input border border-primary/25 bg-primary/5 px-3 py-2.5"
+            >
+              <p className="text-xs font-semibold text-foreground">
+                Add all {addableGaps.length} missing must-have skills?
+              </p>
+              <p className="mt-1 text-[11px] leading-relaxed text-foreground-secondary">
+                This will add{" "}
+                <span className="font-medium text-foreground">
+                  {summarizeLabels(addableGaps.map((keyword) => keyword.label))}
+                </span>{" "}
+                to your Skills list. Only confirm if you can genuinely discuss each one. You can
+                undo the whole batch.
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <Button size="sm" onClick={handleConfirmAddAll}>
+                  <ListPlus size={12} />
+                  Add all {addableGaps.length}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setBulkConfirming(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {lastAdded && lastAdded.length > 0 && (
+            <div
+              aria-live="polite"
+              className="ats-pop mt-3 flex items-center gap-2 rounded-input border border-success/25 bg-success/10 px-3 py-2"
+            >
               <CheckCircle2 size={14} className="shrink-0 text-success" />
               <p className="flex-1 text-[11px] text-foreground">
-                Added <span className="font-semibold">{lastAdded}</span> to Skills.
+                Added{" "}
+                <span className="font-semibold">
+                  {lastAdded.length === 1 ? lastAdded[0] : `${lastAdded.length} skills`}
+                </span>{" "}
+                to Skills.
               </p>
               <button
                 type="button"
@@ -359,7 +433,7 @@ export function AtsOverviewPanel({
               </p>
             </div>
           ) : (
-            <ul className="mt-3 space-y-2">
+            <ul className="ats-stagger mt-3 space-y-2">
               {weakCritical.slice(0, 5).map((keyword) => {
                 const canAdd = canAddSkill(keyword);
                 const target = gapTargetSection(keyword, canAdd);
@@ -394,7 +468,10 @@ export function AtsOverviewPanel({
                         <Button
                           variant="secondary"
                           size="sm"
-                          onClick={() => setConfirmingId(isConfirming ? null : keyword.id)}
+                          onClick={() => {
+                            setBulkConfirming(false);
+                            setConfirmingId(isConfirming ? null : keyword.id);
+                          }}
                           aria-expanded={isConfirming}
                         >
                           Add to Skills
@@ -411,7 +488,7 @@ export function AtsOverviewPanel({
                     </div>
 
                     {isConfirming && (
-                      <div className="mt-2 rounded-input border border-primary/25 bg-primary/5 px-3 py-2.5">
+                      <div className="ats-pop mt-2 rounded-input border border-primary/25 bg-primary/5 px-3 py-2.5">
                         <p className="text-[11px] leading-relaxed text-foreground-secondary">
                           Add <span className="font-semibold text-foreground">{keyword.label}</span>{" "}
                           to your Skills list? Only confirm if you can genuinely discuss it.
@@ -486,7 +563,7 @@ export function AtsOverviewPanel({
         </div>
 
         {checkpoint && (
-          <div className="mt-3 rounded-input border border-glass-border bg-popover/60 px-3 py-3">
+          <div className="ats-pop mt-3 rounded-input border border-glass-border bg-popover/60 px-3 py-3">
             {!checkpointMatchesJob ? (
               <div className="flex items-start gap-2">
                 <AlertTriangle size={14} className="mt-0.5 shrink-0 text-warning" />
@@ -573,7 +650,7 @@ export function AtsOverviewPanel({
             scan.
           </p>
         ) : (
-          <ul className="mt-3 space-y-2.5">
+          <ul className="ats-stagger mt-3 space-y-2.5">
             {suggestions.slice(0, 5).map((suggestion) => (
               <li key={suggestion.id} className="flex items-start gap-2.5">
                 <span className="mt-0.5 shrink-0">

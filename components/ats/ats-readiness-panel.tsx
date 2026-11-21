@@ -39,7 +39,7 @@ export function AtsReadinessPanel({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-card border border-glass-border bg-muted/20 p-4">
+      <div className="ats-card rounded-card border border-glass-border bg-muted/20 p-4">
         <div className="flex flex-wrap items-end justify-between gap-2">
           <div>
             <h3 className="text-sm font-semibold text-foreground">ATS Readiness</h3>
@@ -60,7 +60,7 @@ export function AtsReadinessPanel({
         <ProgressBar value={score} className="mt-3" />
       </div>
 
-      <ul className="overflow-hidden rounded-card border border-glass-border">
+      <ul className="ats-stagger overflow-hidden rounded-card border border-glass-border">
         {checks.map((check) => (
           <li key={check.id} className="border-b border-glass-border last:border-b-0">
             <div className="flex items-start gap-3 px-3.5 py-3 sm:px-4">

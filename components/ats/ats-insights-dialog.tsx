@@ -19,6 +19,7 @@ import { downloadBlob, suggestedFilename } from "@/lib/download-file";
 import { Dialog } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import type { AtsKeyword, AtsSection } from "@/types/ats";
+import type { SkillCategory } from "@/types/resume";
 import { checkpointMatchesJob, createAtsCheckpoint } from "@/utils/ats/checkpoint";
 import { canAddKeywordToSkills, skillCategoryForKeyword } from "@/utils/ats/keyword-actions";
 import { buildAtsReportText } from "@/utils/ats/report";
@@ -37,7 +38,7 @@ export function AtsInsightsDialog({
   open: boolean;
   onClose: () => void;
 }) {
-  const { resume, resumes, activeResumeId, addSkill, undo } = useResume();
+  const { resume, resumes, activeResumeId, addSkill, addSkills, undo } = useResume();
   const { checkpoint, saveCheckpoint, clearCheckpoint } =
     useAtsCheckpoints(activeResumeId);
   const getActions = useAppActions();
@@ -119,6 +120,33 @@ export function AtsInsightsDialog({
     [addSkill, resume]
   );
 
+  const handleAddSkills = useCallback(
+    (keywords: AtsKeyword[]) => {
+      const additions: { label: string; category: SkillCategory }[] = [];
+      const seen = new Set(
+        resume.skills.map((skill) => skill.label.trim().replace(/\s+/g, " ").toLowerCase())
+      );
+
+      for (const keyword of keywords) {
+        if (!canAddKeywordToSkills(keyword, resume)) continue;
+        const category = skillCategoryForKeyword(keyword.category);
+        if (!category) continue;
+
+        const label = keyword.label.trim().replace(/\s+/g, " ");
+        const key = label.toLowerCase();
+        if (!label || seen.has(key)) continue;
+
+        seen.add(key);
+        additions.push({ label, category });
+      }
+
+      if (additions.length === 0) return [];
+      addSkills(additions);
+      return additions.map((addition) => addition.label);
+    },
+    [addSkills, resume]
+  );
+
   const handleUndoAddSkill = useCallback(() => {
     undo();
   }, [undo]);
@@ -196,7 +224,7 @@ export function AtsInsightsDialog({
       className="flex h-[min(92vh,980px)] max-w-6xl flex-col overflow-hidden rounded-dialog border border-glass-border bg-popover p-0 text-popover-foreground shadow-2xl"
     >
       <header className="relative flex shrink-0 items-center gap-3 border-b border-glass-border px-4 py-3 pr-14 sm:px-5">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-button bg-primary/10 text-primary">
+        <span className="ats-icon-glow flex h-9 w-9 shrink-0 items-center justify-center rounded-button bg-primary/10 text-primary">
           <ScanSearch size={17} />
         </span>
         <div className="min-w-0">
@@ -300,7 +328,7 @@ export function AtsInsightsDialog({
 
           <div ref={resultsRef} className="min-w-0">
             {!analysis ? (
-              <div className="rounded-card border border-dashed border-glass-border bg-muted/10 p-5 sm:p-7">
+              <div className="ats-enter rounded-card border border-dashed border-glass-border bg-muted/10 p-5 sm:p-7">
                 <span className="flex h-11 w-11 items-center justify-center rounded-card bg-primary/10 text-primary">
                   <Target size={20} />
                 </span>
@@ -313,7 +341,7 @@ export function AtsInsightsDialog({
                   read.
                 </p>
 
-                <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                <div className="ats-stagger mt-5 grid gap-3 sm:grid-cols-3">
                   <div className="rounded-input border border-glass-border bg-popover/60 p-3">
                     <Target size={15} className="text-primary" />
                     <p className="mt-2 text-xs font-semibold text-foreground">Job Match</p>
@@ -347,7 +375,7 @@ export function AtsInsightsDialog({
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="flex flex-wrap items-end justify-between gap-3">
+                <div className="ats-enter flex flex-wrap items-end justify-between gap-3">
                   <div>
                     <p className="text-[10px] font-semibold uppercase tracking-widest text-primary">
                       Analysis ready
@@ -384,7 +412,7 @@ export function AtsInsightsDialog({
                         className={cn(
                           "relative shrink-0 rounded-button px-3 py-1.5 text-xs font-medium transition-colors",
                           isActive
-                            ? "bg-primary text-primary-foreground shadow-xs"
+                            ? "ats-tab-active bg-primary text-primary-foreground shadow-xs"
                             : "text-foreground-secondary hover:text-foreground"
                         )}
                       >
@@ -405,9 +433,11 @@ export function AtsInsightsDialog({
                 </div>
 
                 <div
+                  key={activeTab}
                   id={`ats-panel-${activeTab}`}
                   role="tabpanel"
                   aria-labelledby={`ats-tab-${activeTab}`}
+                  className="ats-tab-panel"
                 >
                   {activeTab === "overview" && (
                     <AtsOverviewPanel
@@ -416,6 +446,7 @@ export function AtsInsightsDialog({
                       checkpointMatchesJob={checkpointMatchesCurrentJob}
                       canAddSkill={canAddSkill}
                       onAddSkill={handleAddSkill}
+                      onAddSkills={handleAddSkills}
                       onUndoAddSkill={handleUndoAddSkill}
                       onJumpToSection={handleJumpToSection}
                       onSaveCheckpoint={handleSaveCheckpoint}

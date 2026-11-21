@@ -65,6 +65,7 @@ export interface ResumeContextValue {
   duplicateProject: (id: string) => void;
 
   addSkill: (label: string, category: SkillCategory) => void;
+  addSkills: (skills: { label: string; category: SkillCategory }[]) => void;
   removeSkill: (id: string) => void;
 
   /** Skill category CRUD -- allows users to rename, reorder, add, and
@@ -490,6 +491,25 @@ export function ResumeProvider({ children }: { children: React.ReactNode }) {
       addSkill: (label, category) => {
         if (!label.trim()) return;
         addEntry("skills", { id: createId(), label: label.trim(), category });
+      },
+      addSkills: (skills) => {
+        commit((prev) => {
+          const existing = new Set(
+            prev.skills.map((skill) => skill.label.trim().replace(/\s+/g, " ").toLowerCase())
+          );
+          const additions = [];
+
+          for (const skill of skills) {
+            const label = skill.label.trim().replace(/\s+/g, " ");
+            const key = label.toLowerCase();
+            if (!label || existing.has(key)) continue;
+            existing.add(key);
+            additions.push({ id: createId(), label, category: skill.category });
+          }
+
+          if (additions.length === 0) return prev;
+          return { ...prev, skills: [...prev.skills, ...additions] };
+        }, { discrete: true });
       },
       removeSkill: (id) => removeEntry("skills", id),
 

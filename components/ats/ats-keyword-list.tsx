@@ -93,7 +93,7 @@ export function AtsKeywordList({ keywords }: { keywords: AtsKeyword[] }) {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search keywords..."
-            className="h-10 w-full rounded-input border border-glass-border bg-transparent pl-9 pr-3 text-sm text-foreground placeholder:text-foreground-secondary/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25"
+            className="h-10 w-full rounded-input border border-glass-border bg-transparent pl-9 pr-3 text-sm text-foreground transition-colors placeholder:text-foreground-secondary/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25"
           />
         </label>
 
@@ -116,17 +116,17 @@ export function AtsKeywordList({ keywords }: { keywords: AtsKeyword[] }) {
           ))}
         </div>
 
-        <p className="text-[11px] text-foreground-secondary">
+        <p aria-live="polite" className="text-[11px] text-foreground-secondary">
           {filtered.length} of {keywords.length} keywords
         </p>
       </div>
 
       {filtered.length === 0 ? (
-        <div className="rounded-card border border-glass-border bg-muted/20 px-4 py-8 text-center text-sm text-foreground-secondary">
+        <div className="ats-pop rounded-card border border-glass-border bg-muted/20 px-4 py-8 text-center text-sm text-foreground-secondary">
           No keywords match this filter.
         </div>
       ) : (
-        <ul className="overflow-hidden rounded-card border border-glass-border">
+        <ul className="ats-stagger overflow-hidden rounded-card border border-glass-border">
           {filtered.map((keyword) => {
             const isExpanded = expandedId === keyword.id;
             const canExpand = keyword.locations.length > 0 || !!keyword.jdSnippet;
@@ -203,7 +203,7 @@ export function AtsKeywordList({ keywords }: { keywords: AtsKeyword[] }) {
                     <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-button text-foreground-secondary transition-colors group-hover:bg-muted group-hover:text-foreground">
                       <ChevronDown
                         size={15}
-                        className={cn("transition-transform", isExpanded && "rotate-180")}
+                        className={cn("transition-transform duration-200", isExpanded && "rotate-180")}
                       />
                     </span>
                   )}
@@ -214,7 +214,7 @@ export function AtsKeywordList({ keywords }: { keywords: AtsKeyword[] }) {
                     id={panelId}
                     role="region"
                     aria-label={`${keyword.label} details`}
-                    className="border-t border-glass-border bg-muted/20 px-3.5 py-3 sm:px-4"
+                    className="ats-detail border-t border-glass-border bg-muted/20 px-3.5 py-3 sm:px-4"
                   >
                     {keyword.jdSnippet && (
                       <p className="text-xs leading-relaxed text-foreground-secondary">

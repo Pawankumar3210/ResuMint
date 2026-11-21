@@ -684,6 +684,133 @@ body,
 }
 
 /* ---------------------------------------------------------------------- */
+/* ATS Insights motion                                                    */
+/* Subtle CSS-only entrances and hover feedback. Transform/opacity only,  */
+/* so cards and lists never shift layout or trigger scroll jank.          */
+/* ---------------------------------------------------------------------- */
+@keyframes ats-fade-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes ats-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.98) translate3d(0, 4px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+}
+
+@keyframes ats-tab-in {
+  0% {
+    transform: scale(0.96);
+  }
+  65% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes ats-icon-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 0%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-primary) 12%, transparent);
+  }
+}
+
+.ats-card {
+  transition:
+    border-color 240ms ease,
+    background-color 240ms ease,
+    box-shadow 240ms ease;
+}
+
+@media (hover: hover) {
+  .ats-card:hover {
+    border-color: color-mix(in srgb, var(--color-primary) 34%, var(--glass-border));
+    box-shadow: 0 14px 34px -26px color-mix(in srgb, var(--color-primary) 55%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ats-enter {
+    animation: ats-fade-up 480ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .ats-tab-panel {
+    animation: ats-fade-up 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .ats-pop {
+    animation: ats-pop-in 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .ats-detail {
+    animation: ats-fade-up 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .ats-score-ring {
+    animation: ats-pop-in 480ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .ats-tab-active {
+    animation: ats-tab-in 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .ats-icon-glow {
+    animation: ats-icon-glow 3.4s ease-in-out infinite;
+  }
+
+  .ats-stagger > * {
+    animation: ats-fade-up 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .ats-stagger > *:nth-child(1) { animation-delay: 0ms; }
+  .ats-stagger > *:nth-child(2) { animation-delay: 35ms; }
+  .ats-stagger > *:nth-child(3) { animation-delay: 70ms; }
+  .ats-stagger > *:nth-child(4) { animation-delay: 105ms; }
+  .ats-stagger > *:nth-child(5) { animation-delay: 140ms; }
+  .ats-stagger > *:nth-child(6) { animation-delay: 175ms; }
+  .ats-stagger > *:nth-child(7) { animation-delay: 210ms; }
+  .ats-stagger > *:nth-child(8) { animation-delay: 245ms; }
+  .ats-stagger > *:nth-child(n + 9) { animation-delay: 280ms; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ats-enter,
+  .ats-tab-panel,
+  .ats-pop,
+  .ats-detail,
+  .ats-score-ring,
+  .ats-tab-active,
+  .ats-icon-glow,
+  .ats-stagger > * {
+    animation: none;
+  }
+
+  .ats-card {
+    transition: none;
+  }
+
+  .ats-card:hover {
+    box-shadow: none;
+  }
+}
+
+/* ---------------------------------------------------------------------- */
 /* Print stylesheet                                                       */
 /* Printing (Ctrl/Cmd+P) from the live preview shows *only* the resume    */
 /* paper -- none of the surrounding app chrome (navbar, builder panel,    */
