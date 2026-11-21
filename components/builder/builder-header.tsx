@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { ScanSearch, Upload } from "lucide-react";
 import { useCompletion } from "@/hooks/use-completion";
-import { useResume } from "@/hooks/use-resume";
 import { useRegisterAppAction } from "@/hooks/use-app-actions";
 import { useToast } from "@/hooks/use-toast";
 import { isProgrammaticLoadActive } from "@/lib/programmatic-load-state";
@@ -16,7 +15,6 @@ import { ResumeSwitcher } from "@/components/builder/resume-switcher";
 
 export function BuilderHeader() {
   const { percentage } = useCompletion();
-  const { resume } = useResume();
   const [importOpen, setImportOpen] = useState(false);
   const [atsInsightsOpen, setAtsInsightsOpen] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -95,7 +93,6 @@ export function BuilderHeader() {
       <AtsInsightsDialog
         open={atsInsightsOpen}
         onClose={() => setAtsInsightsOpen(false)}
-        resume={resume}
       />
     </div>
   );

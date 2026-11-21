@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   AlertTriangle,
   ListFilter,
@@ -9,28 +9,43 @@ import {
   Target,
   X,
 } from "lucide-react";
+import { useAppActions } from "@/hooks/use-app-actions";
+import { useAtsAnalysis } from "@/hooks/use-ats-analysis";
+import { useAtsCheckpoints } from "@/hooks/use-ats-checkpoints";
+import { useResume } from "@/hooks/use-resume";
+import { useToast } from "@/hooks/use-toast";
+import { copyText } from "@/lib/clipboard";
+import { downloadBlob, suggestedFilename } from "@/lib/download-file";
 import { Dialog } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useAtsAnalysis } from "@/hooks/use-ats-analysis";
-import type { Resume } from "@/types/resume";
+import type { AtsKeyword, AtsSection } from "@/types/ats";
+import { checkpointMatchesJob, createAtsCheckpoint } from "@/utils/ats/checkpoint";
+import { canAddKeywordToSkills, skillCategoryForKeyword } from "@/utils/ats/keyword-actions";
+import { buildAtsReportText } from "@/utils/ats/report";
 import { cn } from "@/lib/utils";
 import { AtsKeywordList } from "./ats-keyword-list";
 import { AtsOverviewPanel } from "./ats-overview-panel";
 import { AtsReadinessPanel } from "./ats-readiness-panel";
+import { AtsTextPreview } from "./ats-text-preview";
 
-type AtsTab = "overview" | "keywords" | "readiness";
+type AtsTab = "overview" | "keywords" | "readiness" | "text";
 
 export function AtsInsightsDialog({
   open,
   onClose,
-  resume,
 }: {
   open: boolean;
   onClose: () => void;
-  resume: Resume;
 }) {
+  const { resume, resumes, activeResumeId, addSkill, undo } = useResume();
+  const { checkpoint, saveCheckpoint, clearCheckpoint } =
+    useAtsCheckpoints(activeResumeId);
+  const getActions = useAppActions();
+  const { showToast } = useToast();
+
   const {
     jobDescription,
+    submittedJobDescription,
     setJobDescription,
     analysis,
     analyze,
@@ -42,6 +57,14 @@ export function AtsInsightsDialog({
 
   const [activeTab, setActiveTab] = useState<AtsTab>("overview");
   const resultsRef = useRef<HTMLDivElement>(null);
+
+  const resumeName =
+    resumes.find((saved) => saved.id === activeResumeId)?.name ?? "My Resume";
+  const checkpointMatchesCurrentJob = Boolean(
+    checkpoint &&
+      submittedJobDescription &&
+      checkpointMatchesJob(checkpoint, submittedJobDescription)
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -69,10 +92,94 @@ export function AtsInsightsDialog({
     setActiveTab("overview");
   };
 
+  const handleJumpToSection = useCallback(
+    (section: AtsSection) => {
+      onClose();
+      window.setTimeout(() => {
+        getActions().jumpToSection?.(section);
+      }, 180);
+    },
+    [getActions, onClose]
+  );
+
+  const canAddSkill = useCallback(
+    (keyword: AtsKeyword) => canAddKeywordToSkills(keyword, resume),
+    [resume]
+  );
+
+  const handleAddSkill = useCallback(
+    (keyword: AtsKeyword) => {
+      if (!canAddKeywordToSkills(keyword, resume)) return false;
+      const category = skillCategoryForKeyword(keyword.category);
+      if (!category) return false;
+
+      addSkill(keyword.label, category);
+      return true;
+    },
+    [addSkill, resume]
+  );
+
+  const handleUndoAddSkill = useCallback(() => {
+    undo();
+  }, [undo]);
+
+  const handleSaveCheckpoint = useCallback(() => {
+    if (!analysis || !submittedJobDescription) return;
+    saveCheckpoint(createAtsCheckpoint(analysis, submittedJobDescription));
+    showToast("Checkpoint saved. Make changes, then compare your progress.", "success");
+  }, [analysis, saveCheckpoint, showToast, submittedJobDescription]);
+
+  const handleClearCheckpoint = useCallback(() => {
+    clearCheckpoint();
+    showToast("Checkpoint cleared");
+  }, [clearCheckpoint, showToast]);
+
+  const buildCurrentReport = useCallback(() => {
+    if (!analysis || !submittedJobDescription) return null;
+
+    return buildAtsReportText({
+      analysis,
+      resumeName,
+      candidateName: resume.personal.fullName.trim() || undefined,
+      checkpoint,
+      checkpointMatchesJob: checkpointMatchesCurrentJob,
+    });
+  }, [
+    analysis,
+    checkpoint,
+    checkpointMatchesCurrentJob,
+    resume.personal.fullName,
+    resumeName,
+    submittedJobDescription,
+  ]);
+
+  const handleExportReport = useCallback(() => {
+    const report = buildCurrentReport();
+    if (!report) return;
+
+    downloadBlob(
+      new Blob([report], { type: "text/plain;charset=utf-8" }),
+      `${suggestedFilename(resumeName)}_ATS_Report.txt`
+    );
+    showToast("ATS report downloaded", "success");
+  }, [buildCurrentReport, resumeName, showToast]);
+
+  const handleCopyReport = useCallback(async () => {
+    const report = buildCurrentReport();
+    if (!report) return;
+
+    const copied = await copyText(report);
+    showToast(
+      copied ? "ATS report copied" : "Couldn't copy the report. Try downloading it instead.",
+      copied ? "success" : "error"
+    );
+  }, [buildCurrentReport, showToast]);
+
   const tabs: { id: AtsTab; label: string; count?: number }[] = [
     { id: "overview", label: "Overview" },
     { id: "keywords", label: "Keywords", count: analysis?.keywords.length },
     { id: "readiness", label: "ATS Checks" },
+    { id: "text", label: "Plain Text" },
   ];
 
   const currentWords = jobDescription.trim()
@@ -302,7 +409,21 @@ export function AtsInsightsDialog({
                   role="tabpanel"
                   aria-labelledby={`ats-tab-${activeTab}`}
                 >
-                  {activeTab === "overview" && <AtsOverviewPanel analysis={analysis} />}
+                  {activeTab === "overview" && (
+                    <AtsOverviewPanel
+                      analysis={analysis}
+                      checkpoint={checkpoint}
+                      checkpointMatchesJob={checkpointMatchesCurrentJob}
+                      canAddSkill={canAddSkill}
+                      onAddSkill={handleAddSkill}
+                      onUndoAddSkill={handleUndoAddSkill}
+                      onJumpToSection={handleJumpToSection}
+                      onSaveCheckpoint={handleSaveCheckpoint}
+                      onClearCheckpoint={handleClearCheckpoint}
+                      onExportReport={handleExportReport}
+                      onCopyReport={handleCopyReport}
+                    />
+                  )}
                   {activeTab === "keywords" && (
                     <AtsKeywordList keywords={analysis.keywords} />
                   )}
@@ -312,6 +433,7 @@ export function AtsInsightsDialog({
                       score={analysis.scores.readiness}
                     />
                   )}
+                  {activeTab === "text" && <AtsTextPreview resume={resume} />}
                 </div>
               </div>
             )}

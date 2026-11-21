@@ -47,6 +47,7 @@ export function useAtsAnalysis(resume: Resume, active = true) {
 
   return {
     jobDescription,
+    submittedJobDescription,
     setJobDescription,
     analysis,
     analyze,

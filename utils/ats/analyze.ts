@@ -8,6 +8,8 @@ import type {
 import type { Resume } from "@/types/resume";
 import { extractJobDescription } from "./jobDescription";
 import { buildAtsReadiness, scoreReadiness } from "./readiness";
+import { findRelatedSkills } from "./related";
+import { buildAtsRequirements } from "./requirements";
 import { buildResumeEvidence, matchKeywordInResume } from "./resumeIndex";
 import { buildAtsSuggestions } from "./suggestions";
 
@@ -98,6 +100,10 @@ export function analyzeResumeAgainstJob(
         match: match.match,
         matchedAlias: match.matchedAlias,
         coverage: match.coverage,
+        relatedSkills:
+          match.coverage === "none"
+            ? findRelatedSkills(keyword.id, keyword.label, evidence)
+            : [],
         jdSnippet: keyword.jdSnippet,
         locations: match.locations,
       };
@@ -107,10 +113,12 @@ export function analyzeResumeAgainstJob(
   const readiness = buildAtsReadiness(resume);
   const scores = buildScores(keywords, scoreReadiness(readiness), priority);
   const suggestions = buildAtsSuggestions(keywords, readiness);
+  const requirements = buildAtsRequirements(extraction.requirements, resume);
 
   return {
     roleTitle: extraction.roleTitle,
     jdWordCount: extraction.wordCount,
+    requirements,
     keywords,
     priority,
     readiness,

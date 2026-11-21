@@ -46,6 +46,23 @@ export type AtsCoverage = "strong" | "supporting" | "skills" | "none";
 
 export type AtsReadinessStatus = "pass" | "warning" | "fail";
 
+export type AtsRequirementStatus = "pass" | "warning" | "fail" | "info";
+
+export type AtsDegreeLevel = "associate" | "bachelor" | "master" | "doctorate";
+
+export interface AtsRequirementCheck {
+  id: string;
+  label: string;
+  status: AtsRequirementStatus;
+  detail: string;
+}
+
+export interface AtsJobRequirements {
+  minExperienceYears?: number;
+  degreeLevel?: AtsDegreeLevel;
+  certifications: string[];
+}
+
 export type AtsSuggestionTone = "critical" | "improve" | "tip";
 
 export interface AtsKeywordLocation {
@@ -70,6 +87,10 @@ export interface AtsKeyword {
   coverage: AtsCoverage;
   /** The resume wording that matched, when match is "related". */
   matchedAlias?: string;
+  /** Related tools or concepts already visible in the resume. These are
+   *  hints only -- they do not increase the match score and never imply
+   *  the exact keyword is present. */
+  relatedSkills?: string[];
   /** A short line from the job description that introduced the term. */
   jdSnippet?: string;
   locations: AtsKeywordLocation[];
@@ -112,9 +133,25 @@ export interface AtsScores {
 export interface AtsAnalysis {
   roleTitle?: string;
   jdWordCount: number;
+  requirements: AtsRequirementCheck[];
   keywords: AtsKeyword[];
   priority: AtsPriorityBreakdown;
   readiness: AtsReadinessCheck[];
   suggestions: AtsSuggestion[];
   scores: AtsScores;
+}
+
+/** A lightweight, local progress checkpoint. It stores scores and gap
+ *  labels only -- never the resume or the full job description. */
+export interface AtsCheckpoint {
+  id: string;
+  createdAt: number;
+  jobFingerprint: string;
+  jobMatch: number;
+  readiness: number;
+  criticalMatched: number;
+  criticalTotal: number;
+  matchedKeywords: number;
+  totalKeywords: number;
+  missingCritical: string[];
 }

@@ -38,10 +38,14 @@ export function buildAtsSuggestions(
   );
 
   for (const keyword of criticalMissing.slice(0, 3)) {
+    const related = keyword.relatedSkills?.length
+      ? ` Your resume already mentions ${keyword.relatedSkills.join(" and ")}; if you have used ${keyword.label}, make that explicit.`
+      : "";
+
     suggestions.push({
       id: `keyword-missing-${keyword.id}`,
       title: `Add evidence for ${keyword.label}`,
-      detail: `The job description treats ${keyword.label} as a must-have, but it isn't visible in your resume. If you have real experience, add a concrete example under Experience or Projects. If not, consider whether this role is the right fit.`,
+      detail: `The job description treats ${keyword.label} as a must-have, but it isn't visible in your resume. If you have real experience, add a concrete example under Experience or Projects.${related} If not, consider whether this role is the right fit.`,
       tone: "critical",
       keywordLabel: keyword.label,
     });

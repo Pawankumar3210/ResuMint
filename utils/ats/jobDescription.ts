@@ -1,10 +1,16 @@
 import { ATS_TAXONOMY, type AtsTaxonomyEntry } from "@/constants/ats-taxonomy";
-import type { AtsKeywordCategory, AtsPriority } from "@/types/ats";
+import type {
+  AtsDegreeLevel,
+  AtsJobRequirements,
+  AtsKeywordCategory,
+  AtsPriority,
+} from "@/types/ats";
 import {
   AMBIGUOUS_ALIASES,
   TECHNICAL_CATEGORIES,
   TECH_CONTEXT_RE,
   isAmbiguousFalsePositive,
+  isNegatedTerm,
   sentenceBounds,
 } from "./context";
 import { findTermSpans, makeSnippet, normalizeSearch, slugify } from "./normalize";
@@ -51,6 +57,7 @@ export interface ExtractedJobKeyword {
 export interface JobDescriptionExtraction {
   roleTitle?: string;
   wordCount: number;
+  requirements: AtsJobRequirements;
   keywords: ExtractedJobKeyword[];
 }
 
@@ -232,13 +239,17 @@ function matchHasTechnicalContext(
   line: JobLine,
   lineMatches: RawTaxonomyMatch[]
 ): boolean {
+  const { start, end } = sentenceBounds(line.normalized, match.start);
+  const sentence = line.normalized.slice(start, end);
+
+  if (isNegatedTerm(sentence, match.start - start, match.end - start)) {
+    return false;
+  }
+
   const alias = normalizeSearch(match.alias);
   if (!AMBIGUOUS_ALIASES.has(alias)) return true;
   if (line.section === "skills") return true;
   if (line.normalized === alias) return true;
-
-  const { start, end } = sentenceBounds(line.normalized, match.start);
-  const sentence = line.normalized.slice(start, end);
 
   if (isAmbiguousFalsePositive(match.alias, sentence)) return false;
   if (TECH_CONTEXT_RE.test(sentence)) return true;
@@ -470,7 +481,9 @@ function overlapsSelectedSpan(
   candidate: string,
   selectedByLine: Map<number, { start: number; end: number }[]>
 ): boolean {
-  const spans = findTermSpans(line.normalized, candidate);
+  const spans = findTermSpans(line.normalized, candidate).filter(
+    (span) => !isNegatedTerm(line.normalized, span.start, span.end)
+  );
   if (spans.length === 0) return true;
 
   const selected = selectedByLine.get(line.index) ?? [];
@@ -582,6 +595,115 @@ function extractUnknownCandidates(
     }));
 }
 
+const DEGREE_PATTERNS: { level: AtsDegreeLevel; pattern: RegExp }[] = [
+  {
+    level: "doctorate",
+    pattern: /\b(?:ph\.?\s?d\.?|doctorate|doctoral degree)\b/i,
+  },
+  {
+    level: "master",
+    pattern: /\b(?:master['’]?s?(?:\s+degree)?|m\.?\s?tech|mba|postgraduate degree)\b/i,
+  },
+  {
+    level: "master",
+    pattern: /\bM\.?\s?E\.?\b/,
+  },
+  {
+    level: "master",
+    pattern: /\bM\.?\s?S\.?\b/,
+  },
+  {
+    level: "master",
+    pattern: /\bM\.?\s?Sc\b/i,
+  },
+  {
+    level: "bachelor",
+    pattern:
+      /\b(?:bachelor['’]?s?(?:\s+degree)?|b\.?\s?tech|undergraduate degree)\b/i,
+  },
+  {
+    level: "bachelor",
+    pattern: /\bB\.?\s?E\.?\b/,
+  },
+  {
+    level: "bachelor",
+    pattern: /\bB\.?\s?S\.?\b/,
+  },
+  {
+    level: "bachelor",
+    pattern: /\bB\.?\s?Sc\b/i,
+  },
+  {
+    level: "associate",
+    pattern: /\b(?:associate['’]?s?\s+degree|associate degree)\b/i,
+  },
+];
+
+const CERTIFICATION_HINTS: { label: string; pattern: RegExp }[] = [
+  { label: "AWS certification", pattern: /\baws\s+(?:certified|certification|certificate)\b/i },
+  { label: "Azure certification", pattern: /\bazure\s+(?:certified|certification|certificate)\b/i },
+  {
+    label: "Google Cloud certification",
+    pattern: /\b(?:google cloud|gcp)\s+(?:certified|certification|certificate)\b/i,
+  },
+  { label: "PMP", pattern: /\bpmp\b/i },
+  { label: "Scrum Master", pattern: /\bscrum master\b/i },
+  { label: "CISSP", pattern: /\bcissp\b/i },
+  { label: "CompTIA Security+", pattern: /\bcomptia\s+security\+/i },
+  { label: "CCNA", pattern: /\bccna\b/i },
+  { label: "Oracle certification", pattern: /\boracle\s+(?:certified|certification|certificate)\b/i },
+];
+
+function extractExperienceYears(text: string): number | undefined {
+  const rangePattern =
+    /\b(?:at least\s+|minimum(?:\s+of)?\s+|over\s+)?(\d{1,2})\s*(?:\+|plus)?\s*(?:to|[-–])\s*\d{1,2}\s*(?:\+|plus)?\s*(?:years?|yrs?)\b/i;
+  const singlePattern =
+    /\b(?:at least\s+|minimum(?:\s+of)?\s+|over\s+)?(\d{1,2})\s*(?:\+|plus)?\s*(?:years?|yrs?)\b/i;
+
+  const numbers: number[] = [];
+  const remaining = text.replace(new RegExp(rangePattern.source, "gi"), " ");
+
+  for (const match of text.matchAll(new RegExp(rangePattern.source, "gi"))) {
+    const value = Number(match[1]);
+    if (Number.isFinite(value) && value > 0) numbers.push(value);
+  }
+  for (const match of remaining.matchAll(new RegExp(singlePattern.source, "gi"))) {
+    const value = Number(match[1]);
+    if (Number.isFinite(value) && value > 0) numbers.push(value);
+  }
+
+  return numbers.length > 0 ? Math.max(...numbers) : undefined;
+}
+
+function extractJobRequirements(lines: JobLine[]): AtsJobRequirements {
+  const contentLines = lines.filter(
+    (line) => !line.isHeading && line.section !== "other"
+  );
+  const criticalLines = contentLines.filter(
+    (line) => line.priority === "critical"
+  );
+  const experienceLines = criticalLines.length > 0 ? criticalLines : contentLines;
+  const text = contentLines.map((line) => line.text).join(" ");
+
+  let degreeLevel: AtsDegreeLevel | undefined;
+  for (const degree of DEGREE_PATTERNS) {
+    if (degree.pattern.test(text)) {
+      degreeLevel = degree.level;
+      break;
+    }
+  }
+
+  return {
+    minExperienceYears: extractExperienceYears(
+      experienceLines.map((line) => line.text).join(" ")
+    ),
+    degreeLevel,
+    certifications: CERTIFICATION_HINTS.filter((certification) =>
+      certification.pattern.test(text)
+    ).map((certification) => certification.label),
+  };
+}
+
 function extractRoleTitle(jd: string): string | undefined {
   const match = jd.match(
     /^\s*(?:job title|position title|role title|position|role)\s*[:\-–—]\s*([^\n]{2,80})/im
@@ -603,6 +725,7 @@ export function extractJobDescription(jd: string): JobDescriptionExtraction {
   return {
     roleTitle: extractRoleTitle(jd),
     wordCount: words,
+    requirements: extractJobRequirements(lines),
     keywords: [...taxonomyKeywords, ...unknownKeywords].sort(
       (a, b) =>
         priorityRank(a.priority) - priorityRank(b.priority) ||

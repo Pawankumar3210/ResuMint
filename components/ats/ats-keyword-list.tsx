@@ -74,7 +74,8 @@ export function AtsKeywordList({ keywords }: { keywords: AtsKeyword[] }) {
       if (!search) return true;
       return (
         keyword.label.toLowerCase().includes(search) ||
-        ATS_CATEGORY_LABELS[keyword.category].toLowerCase().includes(search)
+        ATS_CATEGORY_LABELS[keyword.category].toLowerCase().includes(search) ||
+        keyword.relatedSkills?.some((skill) => skill.toLowerCase().includes(search))
       );
     });
   }, [filter, keywords, query]);
@@ -129,16 +130,29 @@ export function AtsKeywordList({ keywords }: { keywords: AtsKeyword[] }) {
           {filtered.map((keyword) => {
             const isExpanded = expandedId === keyword.id;
             const canExpand = keyword.locations.length > 0 || !!keyword.jdSnippet;
+            const panelId = `ats-keyword-details-${keyword.id.replace(/[^a-z0-9-]/gi, "-")}`;
 
             return (
               <li key={keyword.id} className="border-b border-glass-border last:border-b-0">
-                <div className="flex items-start gap-3 px-3.5 py-3 sm:px-4">
+                <button
+                  type="button"
+                  onClick={() => setExpandedId(isExpanded ? null : keyword.id)}
+                  aria-expanded={canExpand ? isExpanded : undefined}
+                  aria-controls={canExpand ? panelId : undefined}
+                  aria-label={`${isExpanded ? "Hide" : "Show"} details for ${keyword.label}`}
+                  disabled={!canExpand}
+                  className={cn(
+                    "group flex w-full items-start gap-3 px-3.5 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/35 sm:px-4",
+                    canExpand && "cursor-pointer hover:bg-muted/30",
+                    !canExpand && "cursor-default"
+                  )}
+                >
                   <span className="mt-0.5 shrink-0">
                     <KeywordStatusIcon keyword={keyword} />
                   </span>
 
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <span className="min-w-0 flex-1">
+                    <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
                       <span className="text-sm font-semibold text-foreground">
                         {keyword.label}
                       </span>
@@ -153,9 +167,9 @@ export function AtsKeywordList({ keywords }: { keywords: AtsKeyword[] }) {
                       <span className="text-[10px] text-foreground-secondary">
                         {keyword.frequency} {keyword.frequency === 1 ? "mention" : "mentions"}
                       </span>
-                    </div>
+                    </span>
 
-                    <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-foreground-secondary">
+                    <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-foreground-secondary">
                       <span>{ATS_CATEGORY_LABELS[keyword.category]}</span>
                       <span aria-hidden="true">·</span>
                       <span
@@ -174,27 +188,34 @@ export function AtsKeywordList({ keywords }: { keywords: AtsKeyword[] }) {
                           <span>Related: {keyword.matchedAlias}</span>
                         </>
                       )}
-                    </div>
-                  </div>
+                      {keyword.relatedSkills && keyword.relatedSkills.length > 0 && (
+                        <>
+                          <span aria-hidden="true">·</span>
+                          <span className="text-primary">
+                            Related in resume: {keyword.relatedSkills.join(", ")}
+                          </span>
+                        </>
+                      )}
+                    </span>
+                  </span>
 
                   {canExpand && (
-                    <button
-                      type="button"
-                      onClick={() => setExpandedId(isExpanded ? null : keyword.id)}
-                      aria-expanded={isExpanded}
-                      aria-label={`${isExpanded ? "Hide" : "Show"} details for ${keyword.label}`}
-                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-button text-foreground-secondary transition-colors hover:bg-muted hover:text-foreground"
-                    >
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-button text-foreground-secondary transition-colors group-hover:bg-muted group-hover:text-foreground">
                       <ChevronDown
                         size={15}
                         className={cn("transition-transform", isExpanded && "rotate-180")}
                       />
-                    </button>
+                    </span>
                   )}
-                </div>
+                </button>
 
                 {isExpanded && canExpand && (
-                  <div className="border-t border-glass-border bg-muted/20 px-3.5 py-3 sm:px-4">
+                  <div
+                    id={panelId}
+                    role="region"
+                    aria-label={`${keyword.label} details`}
+                    className="border-t border-glass-border bg-muted/20 px-3.5 py-3 sm:px-4"
+                  >
                     {keyword.jdSnippet && (
                       <p className="text-xs leading-relaxed text-foreground-secondary">
                         <span className="font-semibold text-foreground">Job description: </span>
@@ -236,8 +257,11 @@ export function AtsKeywordList({ keywords }: { keywords: AtsKeyword[] }) {
                     )}
 
                     {keyword.locations.length === 0 && (
-                      <p className="mt-2 text-xs text-foreground-secondary">
+                      <p className="mt-2 text-xs leading-relaxed text-foreground-secondary">
                         This keyword was not found anywhere in your resume.
+                        {keyword.relatedSkills && keyword.relatedSkills.length > 0
+                          ? ` Your resume does mention related skills: ${keyword.relatedSkills.join(", ")}. Only add ${keyword.label} if you have real experience with it.`
+                          : ""}
                       </p>
                     )}
                   </div>
